@@ -1,0 +1,2 @@
+rootProject.name = 'gradle-embulk-plugin'
+rootProject.buildFileName = 'build.gradle.kts'
