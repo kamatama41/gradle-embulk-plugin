@@ -18,6 +18,11 @@ repositories {
     jcenter()
 }
 
+configure<JavaPluginConvention> {
+    sourceCompatibility = JavaVersion.VERSION_1_7
+    targetCompatibility = JavaVersion.VERSION_1_7
+}
+
 val kotlinVersion: String by extra
 dependencies {
     compile(gradleApi())
