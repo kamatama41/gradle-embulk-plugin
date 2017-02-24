@@ -20,6 +20,7 @@ repositories {
 
 val kotlinVersion: String by extra
 dependencies {
+    compile(gradleApi())
     compile("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
     testCompile("junit:junit:4.12")
 }
