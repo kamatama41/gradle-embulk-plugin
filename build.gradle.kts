@@ -1,5 +1,8 @@
 import org.eclipse.jgit.api.Git as JGit
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
+import org.gradle.api.publish.PublishingExtension
+import org.gradle.api.publish.maven.MavenPublication
+import org.gradle.api.tasks.bundling.Jar
 
 buildscript {
     val kotlinVersion = "1.0.6"
@@ -15,7 +18,9 @@ buildscript {
 
 apply {
     plugin("idea")
+    plugin("java")
     plugin("kotlin")
+    plugin("maven-publish")
 }
 
 repositories {
@@ -35,6 +40,15 @@ dependencies {
 }
 
 val git = Git(project)
+val sourceSets = the<JavaPluginConvention>().sourceSets
+
+/**
+ * Add a task for source Jar
+ */
+val sourceJar = task<Jar>("sourceJar") {
+    val main by sourceSets
+    from(main.allSource)
+}
 
 /**
  * Remove 'repository' directory from Git
@@ -43,6 +57,30 @@ task("removeRepository") {
     doLast {
         git.rm("repository")
         git.commit("repository", message = "Remove repository")
+    }
+}
+
+/**
+ * Configuration for maven-publish plugin
+ */
+configure<PublishingExtension> {
+    publications {
+        create<MavenPublication>("maven") {
+            groupId = "com.github.kamatama41"
+            artifactId = "gradle-embulk-plugin"
+
+            val java by components
+            from(java)
+
+            // Add source jar to publication
+            artifact(mapOf(
+                    "source" to sourceJar,
+                    "classifier" to "sources"
+            ))
+        }
+    }
+    repositories {
+        maven { setUrl("file://${File(rootDir, "repository").absolutePath}") }
     }
 }
 
