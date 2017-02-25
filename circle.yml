@@ -1,0 +1,16 @@
+machine:
+  java:
+    version: oraclejdk8
+
+dependencies:
+  pre:
+    - git config --global user.email "shiketaudonko41@gmail.com"
+    - git config --global user.name "kamatama41"
+
+deployment:
+  snapshot:
+    branch: /^(?!(master|snapshot)$).+$/
+    commands:
+      - ./gradlew removeRepository publish
+      - git checkout -b snapshot
+      - git push --force-with-lease origin snapshot
