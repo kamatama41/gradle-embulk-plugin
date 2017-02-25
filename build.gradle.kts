@@ -49,6 +49,7 @@ val repositoryDir = "repository"
 val sourceJar = task<Jar>("sourceJar") {
     val main by sourceSets
     from(main.allSource)
+    classifier = "sources"
 }
 
 /**
@@ -87,10 +88,7 @@ configure<PublishingExtension> {
             from(java)
 
             // Add source jar to publication
-            artifact(mapOf(
-                    "source" to sourceJar,
-                    "classifier" to "sources"
-            ))
+            artifact(sourceJar)
         }
     }
     repositories {
