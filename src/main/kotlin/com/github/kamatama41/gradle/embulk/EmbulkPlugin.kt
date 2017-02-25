@@ -12,28 +12,37 @@ class EmbulkPlugin : Plugin<Project> {
         project.configurations.maybeCreate("provided")
 
         classpathTask(project)
+        clearTask(project)
     }
 
     fun classpathTask(project: Project) {
         project.tasks.create("classpath", Copy::class.java) { task ->
             project.afterEvaluate {
                 val jar = project.tasks.findByName("jar") as Jar
-                val target = "classpath"
                 val runtime = project.configurations.findByName("runtime")
                 val provided = project.configurations.findByName("provided")
 
                 task.dependsOn(jar)
                 task.group = GROUP_NAME
 
-                task.doFirst { project.file(target).deleteRecursively() }
+                task.doFirst { project.file(CLASSPATH_DIR).deleteRecursively() }
 
                 task.from(runtime - provided + project.files(jar.archivePath))
-                task.into(target)
+                task.into(CLASSPATH_DIR)
+            }
+        }
+    }
+
+    fun clearTask(project: Project) {
+        project.tasks.create("clear") { task ->
+            project.afterEvaluate {
+                project.delete(CLASSPATH_DIR, "${project.name}.gemspec")
             }
         }
     }
 
     companion object {
         val GROUP_NAME = "embulk"
+        val CLASSPATH_DIR = "classpath"
     }
 }
