@@ -6,13 +6,15 @@ import org.gradle.api.tasks.bundling.Jar
 
 buildscript {
     val kotlinVersion = "1.0.6"
+    val jgitVersion = "4.3.1.201605051710-r"
     extra["kotlinVersion"] = kotlinVersion
+    extra["jgitVersion"] = jgitVersion
     repositories {
         jcenter()
     }
     dependencies {
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
-        classpath("org.eclipse.jgit:org.eclipse.jgit:4.6.0.201612231935-r")
+        classpath("org.eclipse.jgit:org.eclipse.jgit:$jgitVersion")
     }
 }
 
@@ -33,9 +35,12 @@ configure<JavaPluginConvention> {
 }
 
 val kotlinVersion: String by extra
+val jgitVersion: String by extra
 dependencies {
     compile(gradleApi())
     compile("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
+    compile("org.eclipse.jgit:org.eclipse.jgit:$jgitVersion")
+    compile("com.google.guava:guava:20.0")
     testCompile("junit:junit:4.12")
 }
 
@@ -64,14 +69,21 @@ task("removeRepository") {
     }
 }
 
+// TODO: remove
+val clean by tasks
+clean.apply {
+    doLast { file("repository").deleteRecursively() }
+}
+
 /**
  * Override publish task to commit 'repository' dir
  */
 val publish by tasks
 publish.apply {
     doLast {
-        git.add(repositoryDir)
-        git.commit(repositoryDir, message = "Release new version")
+// TODO: uncomment
+//        git.add(repositoryDir)
+//        git.commit(repositoryDir, message = "Release new version")
     }
 }
 
