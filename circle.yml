@@ -7,6 +7,10 @@ dependencies:
     - git config --global user.email "shiketaudonko41@gmail.com"
     - git config --global user.name "kamatama41"
 
+test:
+  override:
+    - ./gradlew check
+
 deployment:
   snapshot:
     branch: /^(?!(master|snapshot)$).+$/
