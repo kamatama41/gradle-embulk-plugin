@@ -1,4 +1,4 @@
-package com.github.kamatama41
+package com.github.kamatama41.gradle.embulk
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
