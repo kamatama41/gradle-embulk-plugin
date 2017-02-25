@@ -41,6 +41,7 @@ dependencies {
 
 val git = Git(project)
 val sourceSets = the<JavaPluginConvention>().sourceSets
+val repositoryDir = "repository"
 
 /**
  * Add a task for source Jar
@@ -55,8 +56,21 @@ val sourceJar = task<Jar>("sourceJar") {
  */
 task("removeRepository") {
     doLast {
-        git.rm("repository")
-        git.commit("repository", message = "Remove repository")
+        if (File(repositoryDir).exists()) {
+            git.rm(repositoryDir)
+            git.commit(repositoryDir, message = "Remove repository")
+        }
+    }
+}
+
+/**
+ * Override publish task to commit 'repository' dir
+ */
+val publish by tasks
+publish.apply {
+    doLast {
+        git.add(repositoryDir)
+        git.commit(repositoryDir, message = "Release new version")
     }
 }
 
