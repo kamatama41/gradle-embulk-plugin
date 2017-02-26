@@ -41,6 +41,7 @@ dependencies {
     compile("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
     compile("org.eclipse.jgit:org.eclipse.jgit:$jgitVersion")
     compile("com.google.guava:guava:20.0")
+    compile("com.github.jruby-gradle:jruby-gradle-plugin:0.1.5")
     testCompile("junit:junit:4.12")
 }
 

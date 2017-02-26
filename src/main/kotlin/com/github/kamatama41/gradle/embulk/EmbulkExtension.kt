@@ -11,4 +11,5 @@ open class EmbulkExtension(project: Project) {
     var email: String? = null
     var licenses: Array<String> = arrayOf("MIT")
     var homepage: String = ""
+    var jrubyVersion: String = "1.7.19" // TODO: update (currently v9.1.x)
 }

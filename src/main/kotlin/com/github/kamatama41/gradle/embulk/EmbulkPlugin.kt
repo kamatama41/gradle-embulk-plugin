@@ -12,9 +12,13 @@ class EmbulkPlugin : Plugin<Project> {
     lateinit var extension: EmbulkExtension
     lateinit var git: Git
     val extensionName = "embulk"
-    val groupName = "embulk"
     val classpathDir = "classpath"
     val gemspecFile: File by lazy { project.file("${project.name}.gemspec") }
+
+    companion object {
+        @JvmStatic
+        val groupName = "embulk"
+    }
 
     override fun apply(project: Project) {
         this.project = project
@@ -25,6 +29,7 @@ class EmbulkPlugin : Plugin<Project> {
 
         classpathTask()
         gemspecTask()
+        gemPushTask()
         clearTask()
     }
 
@@ -44,6 +49,10 @@ class EmbulkPlugin : Plugin<Project> {
                 task.into(classpathDir)
             }
         }
+    }
+
+    fun gemPushTask() {
+        GemPushTask.add(project, extension)
     }
 
     fun gemspecTask() {
