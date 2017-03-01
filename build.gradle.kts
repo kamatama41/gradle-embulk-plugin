@@ -1,3 +1,5 @@
+import net.researchgate.release.GitAdapter
+import net.researchgate.release.ReleaseExtension
 import org.ajoberstar.gradle.git.publish.GitPublishExtension
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
@@ -13,6 +15,7 @@ buildscript {
     dependencies {
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
         classpath("org.ajoberstar:gradle-git-publish:0.1.1-rc.1")
+        classpath("net.researchgate:gradle-release:2.5.0")
     }
 }
 
@@ -22,6 +25,7 @@ apply {
     plugin("kotlin")
     plugin("maven-publish")
     plugin("org.ajoberstar.git-publish")
+    plugin("net.researchgate.release")
 }
 
 repositories {
@@ -55,6 +59,10 @@ val sourceJar = task<Jar>("sourceJar") {
     classifier = "sources"
 }
 
+///////////////////////////////////////////////
+// Extension configurations
+///////////////////////////////////////////////
+
 configure<PublishingExtension> {
     publications {
         create<MavenPublication>("maven") {
@@ -83,9 +91,28 @@ configure<GitPublishExtension> {
     contents { from(repoDir); include("*") } // No copy
 }
 
-val publish by tasks
-val gitPublishReset by tasks
-publish.dependsOn(gitPublishReset)
+configure<ReleaseExtension> {
+    @Suppress("UNCHECKED_CAST")
+    val config = GitAdapter(project, getProperty("attributes") as Map<String, Any>)
+            .createNewConfig() as GitAdapter.GitConfig
+    config.requireBranch = "test"
 
+    setProperty("git", config)
+}
+
+///////////////////////////////////////////////
+// Task configurations
+///////////////////////////////////////////////
+
+// maven-publish
+val publish by tasks
+// git-publish
+val gitPublishReset by tasks
 val gitPublishCommit by tasks
+val gitPublishPush by tasks
+// release
+val afterReleaseBuild by tasks
+
+publish.dependsOn(gitPublishReset)
 gitPublishCommit.dependsOn(publish)
+afterReleaseBuild.dependsOn(gitPublishPush)
