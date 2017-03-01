@@ -3,6 +3,9 @@ package com.github.kamatama41.gradle.embulk
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPlugin
+import org.gradle.api.plugins.JavaPluginConvention
+import org.gradle.api.plugins.quality.Checkstyle
+import org.gradle.api.plugins.quality.CheckstyleExtension
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.bundling.Jar
 import java.io.File
@@ -33,6 +36,7 @@ class EmbulkPlugin : Plugin<Project> {
         packageTask()
         gemPushTask()
         cleanTask()
+        checkstyleTask()
     }
 
     fun classpathTask() {
@@ -112,6 +116,30 @@ class EmbulkPlugin : Plugin<Project> {
             doLast {
                 project.afterEvaluate { project.delete(classpathDir, gemspecFile) }
             }
+        }
+    }
+
+    fun checkstyleTask() {
+        project.plugins.apply("checkstyle")
+        project.extensions.configure(CheckstyleExtension::class.java) { checkstyle ->
+            checkstyle.configFile = extension.checkstyleConfig
+            checkstyle.toolVersion = extension.checkstyleVersion
+        }
+
+        val checkstyleMain = project.tasks.findByName("checkstyleMain") as Checkstyle
+        checkstyleMain.configFile = extension.checkstyleDefaultConfig
+        checkstyleMain.ignoreFailures = extension.checkstyleIgnoreFailures
+
+        val checkstyleTest = project.tasks.findByName("checkstyleTest") as Checkstyle
+        checkstyleTest.configFile = extension.checkstyleDefaultConfig
+        checkstyleTest.ignoreFailures = extension.checkstyleIgnoreFailures
+
+        val sourceSets = project.the<JavaPluginConvention>().sourceSets
+        val main =sourceSets.findByName("main")
+        val test =sourceSets.findByName("test")
+        project.tasks.create("checkstyle", Checkstyle::class.java) { task ->
+            task.classpath = main.output + test.output
+            task.setSource(main.allSource + test.allSource)
         }
     }
 
