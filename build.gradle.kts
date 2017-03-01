@@ -1,20 +1,18 @@
-import org.eclipse.jgit.api.Git as JGit
-import org.eclipse.jgit.storage.file.FileRepositoryBuilder
+import org.ajoberstar.gradle.git.publish.GitPublishExtension
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.tasks.bundling.Jar
 
 buildscript {
     val kotlinVersion = "1.0.6"
-    val jgitVersion = "4.3.1.201605051710-r"
     extra["kotlinVersion"] = kotlinVersion
-    extra["jgitVersion"] = jgitVersion
     repositories {
         jcenter()
+        mavenCentral()
     }
     dependencies {
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
-        classpath("org.eclipse.jgit:org.eclipse.jgit:$jgitVersion")
+        classpath("org.ajoberstar:gradle-git-publish:0.1.1-rc.1")
     }
 }
 
@@ -23,6 +21,7 @@ apply {
     plugin("java")
     plugin("kotlin")
     plugin("maven-publish")
+    plugin("org.ajoberstar.git-publish")
 }
 
 repositories {
@@ -35,67 +34,33 @@ configure<JavaPluginConvention> {
 }
 
 val kotlinVersion: String by extra
-val jgitVersion: String by extra
 dependencies {
     compile(gradleApi())
     compile("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
-    compile("org.eclipse.jgit:org.eclipse.jgit:$jgitVersion")
+    compile("org.eclipse.jgit:org.eclipse.jgit:4.3.1.201605051710-r")
     compile("com.google.guava:guava:20.0")
     compile("com.github.jruby-gradle:jruby-gradle-plugin:0.1.5")
     testCompile("junit:junit:4.12")
 }
 
-val git = Git(project)
-val sourceSets = the<JavaPluginConvention>().sourceSets
-val repositoryDir = "repository"
+val artifactId = "gradle-embulk-plugin"
 
 /**
  * Add a task for source Jar
  */
+val sourceSets = the<JavaPluginConvention>().sourceSets
 val sourceJar = task<Jar>("sourceJar") {
     val main by sourceSets
     from(main.allSource)
     classifier = "sources"
 }
 
-/**
- * Remove 'repository' directory from Git
- */
-task("removeRepository") {
-    doLast {
-        if (File(repositoryDir).exists()) {
-            git.rm(repositoryDir)
-            git.commit(repositoryDir, message = "Remove repository")
-        }
-    }
-}
-
-// TODO: remove
-val clean by tasks
-clean.apply {
-    doLast { file("repository").deleteRecursively() }
-}
-
-/**
- * Override publish task to commit 'repository' dir
- */
-val publish by tasks
-publish.apply {
-    doLast {
-// TODO: uncomment
-//        git.add(repositoryDir)
-//        git.commit(repositoryDir, message = "Release new version")
-    }
-}
-
-/**
- * Configuration for maven-publish plugin
- */
 configure<PublishingExtension> {
     publications {
         create<MavenPublication>("maven") {
             groupId = "com.github.kamatama41"
-            artifactId = "gradle-embulk-plugin"
+            println(artifactId)
+            artifactId = artifactId
 
             val java by components
             from(java)
@@ -105,38 +70,22 @@ configure<PublishingExtension> {
         }
     }
     repositories {
-        maven { setUrl("file://${File(rootDir, "repository").absolutePath}") }
+        val gitPublish: GitPublishExtension by extensions
+        maven { setUrl("file://${file("${gitPublish.repoDir}/repository").absolutePath}") }
     }
 }
 
-class Git(project: Project) {
-    val git = JGit(FileRepositoryBuilder()
-            .readEnvironment()
-            .findGitDir(project.rootProject.rootDir)
-            .build()
-    )
+configure<GitPublishExtension> {
+    repoUri = "git@github.com:kamatama41/maven-repository.git"
+    branch = artifactId
 
-    fun add(vararg patterns: String) {
-        val cmd = git.add()
-        if (patterns.isEmpty()) {
-            cmd.isUpdate = true
-        } else {
-            patterns.forEach { cmd.addFilepattern(it) }
-        }
-        cmd.call()
-    }
-
-    fun rm(vararg patterns: String, cached: Boolean = false) {
-        val cmd = git.rm()
-        cmd.setCached(cached)
-        patterns.forEach { cmd.addFilepattern(it) }
-        cmd.call()
-    }
-
-    fun commit(vararg paths: String, message: String = "Commit by Gradle") {
-        val commit = git.commit()
-        commit.message = message
-        paths.forEach { commit.setOnly(it) }
-        commit.call()
-    }
+    preserve { include("**") } // All files are kept in repository
+    contents { from(repoDir); include("*") } // No copy
 }
+
+val publish by tasks
+val gitPublishReset by tasks
+publish.dependsOn(gitPublishReset)
+
+val gitPublishCommit by tasks
+gitPublishCommit.dependsOn(publish)
