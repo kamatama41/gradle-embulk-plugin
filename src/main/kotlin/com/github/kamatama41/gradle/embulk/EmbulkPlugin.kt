@@ -29,6 +29,7 @@ class EmbulkPlugin : Plugin<Project> {
 
         classpathTask()
         gemspecTask()
+        packageTask()
         gemPushTask()
         cleanTask()
     }
@@ -86,6 +87,17 @@ class EmbulkPlugin : Plugin<Project> {
                         |end
                     """.trimMargin())
                 }
+            }
+        }
+    }
+
+    fun packageTask() {
+        project.tasks.create("package") { task ->
+            task.group = groupName
+            task.dependsOn("gemspec", "classpath")
+            task.doLast {
+                println("> Build succeeded.")
+                println("> You can run embulk with '-L ${project.file(".").absolutePath}' argument.")
             }
         }
     }
