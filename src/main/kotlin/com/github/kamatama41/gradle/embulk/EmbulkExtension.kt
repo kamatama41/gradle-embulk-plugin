@@ -9,9 +9,9 @@ open class EmbulkExtension(project: Project) {
     var summary: String? = null
     var description: String? = null
     var email: String? = null
-    var licenses: Array<String> = arrayOf("MIT")
-    var homepage: String = ""
-    var jrubyVersion: String = "1.7.19" // TODO: update (currently v9.1.x)
+    var licenses = arrayOf("MIT")
+    var homepage = ""
+    var jrubyVersion = "1.7.19" // TODO: update (currently v9.1.x)
 
     var checkstyleVersion = "6.14.1"
     var checkstyleConfig = project.resources.text.fromFile("config/checkstyle/checkstyle.xml").asFile()
