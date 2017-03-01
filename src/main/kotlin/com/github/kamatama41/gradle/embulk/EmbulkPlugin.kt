@@ -30,7 +30,7 @@ class EmbulkPlugin : Plugin<Project> {
         classpathTask()
         gemspecTask()
         gemPushTask()
-        clearTask()
+        cleanTask()
     }
 
     fun classpathTask() {
@@ -90,10 +90,10 @@ class EmbulkPlugin : Plugin<Project> {
         }
     }
 
-    fun clearTask() {
-        project.tasks.create("clear") { task ->
-            project.afterEvaluate {
-                project.delete(classpathDir, gemspecFile)
+    fun cleanTask() {
+        project.tasks.findByName("clean").apply {
+            doLast {
+                project.afterEvaluate { project.delete(classpathDir, gemspecFile) }
             }
         }
     }
