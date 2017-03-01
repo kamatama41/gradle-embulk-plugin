@@ -10,31 +10,34 @@ import org.gradle.api.Task;
  * => For some reason, com.github.jrubygradle.JRubyExec cannot be loaded on Kotlin
  */
 public class JRubyExecTasks {
-    static void gemPushTask(Project project, EmbulkExtension extension) {
+    static void gemPushTask(Project project, final EmbulkExtension extension) {
         final JRubyExec task = project.getTasks().create("gemPush", JRubyExec.class);
-        task.setJrubyVersion(extension.getJrubyVersion());
         task.setGroup(EmbulkPlugin.getGroupName());
-        task.jrubyArgs("-rrubygems/gem_runner", "-eGem::GemRunner.new.run(ARGV)", "push");
 
         project.afterEvaluate(new Action<Project>() {
             @Override
             public void execute(Project project) {
+                task.setJrubyVersion(extension.getJrubyVersion());
+                task.jrubyArgs("-rrubygems/gem_runner", "-eGem::GemRunner.new.run(ARGV)", "push");
                 task.setScript(String.format("pkg/%s-%s.gem", project.getName(), project.getVersion()));
+
+                JRubyExec.updateJRubyDependencies(project);
             }
         });
     }
 
-    static void gemTask(final Project project, EmbulkExtension extension) {
+    static void gemTask(final Project project, final EmbulkExtension extension) {
         final JRubyExec task = project.getTasks().create("gem", JRubyExec.class);
         task.dependsOn("gemspec", "classpath");
-        task.setJrubyVersion(extension.getJrubyVersion());
         task.setGroup(EmbulkPlugin.getGroupName());
-        task.jrubyArgs("-rrubygems/gem_runner", "-eGem::GemRunner.new.run(ARGV)", "build");
 
         project.afterEvaluate(new Action<Project>() {
             @Override
             public void execute(final Project project) {
+                task.setJrubyVersion(extension.getJrubyVersion());
+                task.jrubyArgs("-rrubygems/gem_runner", "-eGem::GemRunner.new.run(ARGV)", "build");
                 task.setScript(project.getName() + ".gemspec");
+
                 task.doLast(new Action<Task>() {
                     @Override
                     public void execute(Task task) {
@@ -45,6 +48,8 @@ public class JRubyExecTasks {
                         }
                     }
                 });
+
+                JRubyExec.updateJRubyDependencies(project);
             }
         });
     }

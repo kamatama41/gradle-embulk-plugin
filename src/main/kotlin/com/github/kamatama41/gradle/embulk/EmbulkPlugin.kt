@@ -1,5 +1,6 @@
 package com.github.kamatama41.gradle.embulk
 
+import com.github.jrubygradle.JRubyPlugin
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPlugin
@@ -28,6 +29,7 @@ class EmbulkPlugin : Plugin<Project> {
         this.extension = project.extensions.create(extensionName, EmbulkExtension::class.java, project)
         this.git = Git(project)
         project.plugins.apply(JavaPlugin::class.java)
+        project.plugins.apply(JRubyPlugin::class.java)
         project.configurations.maybeCreate("provided")
 
         classpathTask()
