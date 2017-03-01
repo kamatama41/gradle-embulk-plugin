@@ -29,6 +29,7 @@ class EmbulkPlugin : Plugin<Project> {
 
         classpathTask()
         gemspecTask()
+        gemTask()
         packageTask()
         gemPushTask()
         cleanTask()
@@ -53,7 +54,7 @@ class EmbulkPlugin : Plugin<Project> {
     }
 
     fun gemPushTask() {
-        GemPushTask.add(project, extension)
+        JRubyExecTasks.gemPushTask(project, extension)
     }
 
     fun gemspecTask() {
@@ -100,6 +101,10 @@ class EmbulkPlugin : Plugin<Project> {
                 println("> You can run embulk with '-L ${project.file(".").absolutePath}' argument.")
             }
         }
+    }
+
+    fun gemTask() {
+        JRubyExecTasks.gemTask(project, extension)
     }
 
     fun cleanTask() {
