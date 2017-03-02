@@ -27,7 +27,7 @@ class EmbulkPlugin : Plugin<Project> {
     override fun apply(project: Project) {
         this.project = project
         this.extension = project.extensions.create(extensionName, EmbulkExtension::class.java, project)
-        this.git = Git(project)
+        this.git = Git.new(project.rootProject.rootDir)
         project.plugins.apply(JavaPlugin::class.java)
         project.plugins.apply(JRubyPlugin::class.java)
         project.configurations.maybeCreate("provided")

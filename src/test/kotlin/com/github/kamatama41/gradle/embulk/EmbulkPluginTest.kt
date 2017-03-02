@@ -4,17 +4,19 @@ import org.gradle.api.Project
 import org.gradle.api.tasks.Copy
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Assert.assertTrue
-import org.junit.Ignore
 import org.junit.Test
+import java.nio.file.Files
 
 class EmbulkPluginTest {
     val project: Project by lazy {
-        val project = ProjectBuilder.builder().build()
+        val tmpDir = Files.createTempDirectory("gradle-embulk-plugin").toFile()
+        Git.init(tmpDir)
+        val project = ProjectBuilder.builder().withProjectDir(tmpDir).build()
         project.pluginManager.apply("com.github.kamatama41.embulk")
         project
     }
 
-    @Ignore @Test fun classpath() {
+    @Test fun classpath() {
         val classpath = project.tasks.findByName("classpath")
         assertTrue("classpath is a Copy task", classpath is Copy)
     }

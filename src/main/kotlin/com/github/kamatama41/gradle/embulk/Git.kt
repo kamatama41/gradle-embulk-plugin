@@ -3,14 +3,9 @@ package com.github.kamatama41.gradle.embulk
 import org.eclipse.jgit.lib.Config
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 import org.eclipse.jgit.api.Git as JGit
-import org.gradle.api.Project
+import java.io.File
 
-class Git(project: Project) {
-    val git = JGit(FileRepositoryBuilder()
-            .readEnvironment()
-            .findGitDir(project.rootProject.rootDir)
-            .build()
-    )
+class Git private constructor(val git: JGit) {
 
     fun add(vararg patterns: String) {
         val cmd = git.add()
@@ -37,4 +32,12 @@ class Git(project: Project) {
     }
 
     fun config(): Config = git.repository.config
+
+    companion object {
+        fun new(gitDir: File): Git =
+                Git(JGit(FileRepositoryBuilder().readEnvironment().findGitDir(gitDir).build()))
+
+        fun init(gitDir: File): Git =
+                Git(JGit.init().setDirectory(gitDir).call())
+    }
 }
