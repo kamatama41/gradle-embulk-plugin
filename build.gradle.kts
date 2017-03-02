@@ -49,6 +49,26 @@ dependencies {
 
 val artifactId = "gradle-embulk-plugin"
 
+///////////////////////////////////////////////
+// Task configurations
+///////////////////////////////////////////////
+
+// maven-publish
+val publish by tasks
+// git-publish
+val gitPublishReset by tasks
+val gitPublishCommit by tasks
+val gitPublishPush by tasks
+// release
+val afterReleaseBuild by tasks
+
+/**
+ * Define task dependencies
+ */
+publish.dependsOn(gitPublishReset)
+gitPublishCommit.dependsOn(publish)
+afterReleaseBuild.dependsOn(gitPublishPush)
+
 /**
  * Add a task for source Jar
  */
@@ -99,20 +119,3 @@ configure<ReleaseExtension> {
 
     setProperty("git", config)
 }
-
-///////////////////////////////////////////////
-// Task configurations
-///////////////////////////////////////////////
-
-// maven-publish
-val publish by tasks
-// git-publish
-val gitPublishReset by tasks
-val gitPublishCommit by tasks
-val gitPublishPush by tasks
-// release
-val afterReleaseBuild by tasks
-
-publish.dependsOn(gitPublishReset)
-gitPublishCommit.dependsOn(publish)
-afterReleaseBuild.dependsOn(gitPublishPush)

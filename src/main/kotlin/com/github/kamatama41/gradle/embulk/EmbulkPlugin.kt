@@ -137,8 +137,8 @@ class EmbulkPlugin : Plugin<Project> {
         checkstyleTest.ignoreFailures = extension.checkstyleIgnoreFailures
 
         val sourceSets = project.the<JavaPluginConvention>().sourceSets
-        val main =sourceSets.findByName("main")
-        val test =sourceSets.findByName("test")
+        val main = sourceSets.findByName("main")
+        val test = sourceSets.findByName("test")
         project.tasks.create("checkstyle", Checkstyle::class.java) { task ->
             task.classpath = main.output + test.output
             task.setSource(main.allSource + test.allSource)
