@@ -12,9 +12,7 @@ test:
     - ./gradlew check
 
 deployment:
-  snapshot:
-    branch: /^(?!(master|snapshot)$).+$/
+  release:
+    branch: release
     commands:
-      - ./gradlew removeRepository publish
-      - git checkout -b snapshot
-      - git push --force-with-lease origin snapshot
+      - ./gradlew release -Prelease.useAutomaticVersion=true
