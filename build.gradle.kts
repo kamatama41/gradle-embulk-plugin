@@ -6,7 +6,7 @@ import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.tasks.bundling.Jar
 
 buildscript {
-    val kotlinVersion = "1.0.6"
+    val kotlinVersion = "1.1.0"
     extra["kotlinVersion"] = kotlinVersion
     repositories {
         jcenter()
