@@ -115,7 +115,7 @@ configure<ReleaseExtension> {
     @Suppress("UNCHECKED_CAST")
     val config = GitAdapter(project, getProperty("attributes") as Map<String, Any>)
             .createNewConfig() as GitAdapter.GitConfig
-    config.requireBranch = "master"
+    config.requireBranch = "release"
 
     setProperty("git", config)
 }
