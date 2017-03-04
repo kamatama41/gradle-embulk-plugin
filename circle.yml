@@ -15,4 +15,5 @@ deployment:
   release:
     branch: release
     commands:
+      - git checkout master
       - ./gradlew release -Prelease.useAutomaticVersion=true
