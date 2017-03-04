@@ -9,10 +9,11 @@ dependencies:
 
 test:
   override:
-    - ./gradlew check
+    - ./gradlew check --stacktrace
 
 deployment:
   release:
     branch: release
     commands:
+      - git checkout master
       - ./gradlew release -Prelease.useAutomaticVersion=true
