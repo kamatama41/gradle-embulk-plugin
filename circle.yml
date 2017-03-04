@@ -6,6 +6,8 @@ dependencies:
   pre:
     - git config --global user.email "shiketaudonko41@gmail.com"
     - git config --global user.name "kamatama41"
+  override:
+    - ./gradlew dependencies
 
 test:
   override:
