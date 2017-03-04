@@ -57,15 +57,17 @@ val artifactId = "gradle-embulk-plugin"
 val publish by tasks
 // git-publish
 val gitPublishReset by tasks
+val gitPublishCopy by tasks
 val gitPublishCommit by tasks
 val gitPublishPush by tasks
 // release
 val afterReleaseBuild by tasks
 
 /**
- * Define task dependencies
+ * Configure tasks
  */
 publish.dependsOn(gitPublishReset)
+gitPublishCopy.enabled = false
 gitPublishCommit.dependsOn(publish)
 afterReleaseBuild.dependsOn(gitPublishPush)
 
@@ -108,7 +110,6 @@ configure<GitPublishExtension> {
     branch = artifactId
 
     preserve { include("**") } // All files are kept in repository
-    contents { from(repoDir); include("*") } // No copy
 }
 
 configure<ReleaseExtension> {
