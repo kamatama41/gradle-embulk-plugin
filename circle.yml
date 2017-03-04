@@ -15,5 +15,7 @@ deployment:
   release:
     branch: release
     commands:
-      - git checkout master
       - ./gradlew release -Prelease.useAutomaticVersion=true
+      - git checkout master
+      - git merge -m "Merge release into master" release
+      - git push origin master
