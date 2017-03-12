@@ -1,31 +1,22 @@
-import net.researchgate.release.GitAdapter
-import net.researchgate.release.ReleaseExtension
-import org.ajoberstar.gradle.git.publish.GitPublishExtension
-import org.gradle.api.publish.PublishingExtension
-import org.gradle.api.publish.maven.MavenPublication
-import org.gradle.api.tasks.bundling.Jar
+import com.github.kamatama41.gradle.gitrelease.GitReleaseExtension
 
 buildscript {
     val kotlinVersion = "1.1.0"
     extra["kotlinVersion"] = kotlinVersion
     repositories {
         jcenter()
-        mavenCentral()
+        maven { setUrl("http://kamatama41.github.com/maven-repository/repository") }
     }
     dependencies {
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
-        classpath("org.ajoberstar:gradle-git-publish:0.1.1-rc.1")
-        classpath("net.researchgate:gradle-release:2.5.0")
+        classpath("com.github.kamatama41:gradle-git-release-plugin:0.1.0")
     }
 }
 
 apply {
     plugin("idea")
-    plugin("java")
     plugin("kotlin")
-    plugin("maven-publish")
-    plugin("org.ajoberstar.git-publish")
-    plugin("net.researchgate.release")
+    plugin("com.github.kamatama41.git-release")
 }
 
 repositories {
@@ -47,76 +38,9 @@ dependencies {
     testCompile("junit:junit:4.12")
 }
 
-val artifactId = "gradle-embulk-plugin"
-
-///////////////////////////////////////////////
-// Task configurations
-///////////////////////////////////////////////
-
-// maven-publish
-val publish by tasks
-// git-publish
-val gitPublishReset by tasks
-val gitPublishCopy by tasks
-val gitPublishCommit by tasks
-val gitPublishPush by tasks
-// release
-val afterReleaseBuild by tasks
-
-/**
- * Configure tasks
- */
-publish.dependsOn(gitPublishReset)
-gitPublishCopy.enabled = false
-gitPublishCommit.dependsOn(publish)
-afterReleaseBuild.dependsOn(gitPublishPush)
-
-/**
- * Add a task for source Jar
- */
-val sourceSets = the<JavaPluginConvention>().sourceSets
-val sourceJar = task<Jar>("sourceJar") {
-    val main by sourceSets
-    from(main.allSource)
-    classifier = "sources"
-}
-
-///////////////////////////////////////////////
-// Extension configurations
-///////////////////////////////////////////////
-
-configure<PublishingExtension> {
-    publications {
-        create<MavenPublication>("maven") {
-            groupId = "com.github.kamatama41"
-            println(artifactId)
-            artifactId = artifactId
-
-            val java by components
-            from(java)
-
-            // Add source jar to publication
-            artifact(sourceJar)
-        }
-    }
-    repositories {
-        val gitPublish: GitPublishExtension by extensions
-        maven { setUrl("file://${file("${gitPublish.repoDir}/repository").absolutePath}") }
-    }
-}
-
-configure<GitPublishExtension> {
+configure<GitReleaseExtension> {
+    groupId = "com.github.kamatama41"
+    artifactId = "gradle-embulk-plugin"
     repoUri = "git@github.com:kamatama41/maven-repository.git"
-    branch = artifactId
-
-    preserve { include("**") } // All files are kept in repository
-}
-
-configure<ReleaseExtension> {
-    @Suppress("UNCHECKED_CAST")
-    val config = GitAdapter(project, getProperty("attributes") as Map<String, Any>)
-            .createNewConfig() as GitAdapter.GitConfig
-    config.requireBranch = "master"
-
-    setProperty("git", config)
+    repoDir = file("${System.getProperty("user.home")}/gh-maven-repository")
 }
