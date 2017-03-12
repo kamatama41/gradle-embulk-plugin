@@ -5,6 +5,7 @@ import org.gradle.api.Project
 open class EmbulkExtension(project: Project) {
     lateinit var category: String
     lateinit var name: String
+    lateinit var embulkVersion: String
     var authors: Array<String> = emptyArray()
     var summary: String? = null
     var description: String? = null

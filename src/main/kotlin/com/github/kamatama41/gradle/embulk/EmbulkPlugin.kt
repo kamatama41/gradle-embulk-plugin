@@ -3,6 +3,7 @@ package com.github.kamatama41.gradle.embulk
 import com.github.jrubygradle.JRubyPlugin
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.internal.artifacts.dsl.DefaultRepositoryHandler
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.plugins.quality.Checkstyle
@@ -39,6 +40,7 @@ class EmbulkPlugin : Plugin<Project> {
         gemPushTask()
         cleanTask()
         checkstyleTask()
+        embulkDependencies()
     }
 
     fun classpathTask() {
@@ -142,6 +144,17 @@ class EmbulkPlugin : Plugin<Project> {
         project.tasks.create("checkstyle", Checkstyle::class.java) { task ->
             task.classpath = main.output + test.output
             task.setSource(main.allSource + test.allSource)
+        }
+    }
+
+    fun embulkDependencies() {
+        project.afterEvaluate {
+            val jcenter = project.repositories.findByName(DefaultRepositoryHandler.DEFAULT_BINTRAY_JCENTER_REPO_NAME)
+            if (jcenter == null) {
+                project.repositories.add(project.repositories.jcenter())
+            }
+            project.dependencies.add("compile", "org.embulk:embulk-core:${extension.embulkVersion}")
+            project.dependencies.add("provided", "org.embulk:embulk-core:${extension.embulkVersion}")
         }
     }
 
