@@ -1,7 +1,6 @@
 package com.github.kamatama41.gradle.embulk
 
 import com.github.jrubygradle.JRubyPlugin
-import com.github.kamatama41.gradle.embulk.task.EmbulkSetupTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.internal.artifacts.dsl.DefaultRepositoryHandler
@@ -13,6 +12,8 @@ import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.bundling.Jar
 import java.io.File
+import java.io.FileOutputStream
+import java.net.URL
 
 class EmbulkPlugin : Plugin<Project> {
     lateinit var project: Project
@@ -163,11 +164,27 @@ class EmbulkPlugin : Plugin<Project> {
     }
 
     fun setupEmbulkTask() {
-        this.project.tasks.create("embulkSetup", EmbulkSetupTask::class.java) { task ->
-            project.afterEvaluate {
-                task.group = groupName
-                task.embulkVersion = extension.embulkVersion
-                task.binFile = extension.binFile
+        this.project.tasks.create("embulkSetup") { task ->
+            task.group = groupName
+
+            task.doLast {
+                val binFile = extension.binFile
+                val embulkVersion = extension.embulkVersion
+                if (!binFile.exists()) {
+                    project.logger.debug("Setting Embulk version to $embulkVersion")
+
+                    val url = URL("https://dl.bintray.com/embulk/maven/embulk-$embulkVersion.jar")
+                    url.openStream().use { input ->
+                        if (!binFile.parentFile.exists()) {
+                            binFile.parentFile.mkdirs()
+                        }
+                        binFile.createNewFile()
+                        binFile.setExecutable(true, true)
+                        FileOutputStream(binFile).use { output ->
+                            input.copyTo(output)
+                        }
+                    }
+                }
             }
         }
     }
