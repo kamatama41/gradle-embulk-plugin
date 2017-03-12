@@ -3,13 +3,17 @@ package com.github.kamatama41.gradle.embulk
 import com.github.jrubygradle.JRubyPlugin
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.internal.artifacts.dsl.DefaultRepositoryHandler
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.plugins.quality.Checkstyle
 import org.gradle.api.plugins.quality.CheckstyleExtension
 import org.gradle.api.tasks.Copy
+import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.bundling.Jar
 import java.io.File
+import java.io.FileOutputStream
+import java.net.URL
 
 class EmbulkPlugin : Plugin<Project> {
     lateinit var project: Project
@@ -39,6 +43,9 @@ class EmbulkPlugin : Plugin<Project> {
         gemPushTask()
         cleanTask()
         checkstyleTask()
+        setupEmbulkTask()
+        embulkExecTask()
+        embulkDependencies()
     }
 
     fun classpathTask() {
@@ -142,6 +149,74 @@ class EmbulkPlugin : Plugin<Project> {
         project.tasks.create("checkstyle", Checkstyle::class.java) { task ->
             task.classpath = main.output + test.output
             task.setSource(main.allSource + test.allSource)
+        }
+    }
+
+    fun embulkDependencies() {
+        project.afterEvaluate {
+            val jcenter = project.repositories.findByName(DefaultRepositoryHandler.DEFAULT_BINTRAY_JCENTER_REPO_NAME)
+            if (jcenter == null) {
+                project.repositories.add(project.repositories.jcenter())
+            }
+            project.dependencies.add("compile", "org.embulk:embulk-core:${extension.embulkVersion}")
+            project.dependencies.add("provided", "org.embulk:embulk-core:${extension.embulkVersion}")
+        }
+    }
+
+    fun setupEmbulkTask() {
+        this.project.tasks.create("embulkSetup") { task ->
+            task.group = groupName
+
+            task.doLast {
+                val binFile = extension.binFile
+                val embulkVersion = extension.embulkVersion
+                if (!binFile.exists()) {
+                    project.logger.debug("Setting Embulk version to $embulkVersion")
+
+                    val url = URL("https://dl.bintray.com/embulk/maven/embulk-$embulkVersion.jar")
+                    url.openStream().use { input ->
+                        if (!binFile.parentFile.exists()) {
+                            binFile.parentFile.mkdirs()
+                        }
+                        binFile.createNewFile()
+                        binFile.setExecutable(true, true)
+                        FileOutputStream(binFile).use { output ->
+                            input.copyTo(output)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    fun embulkExecTask() {
+        project.tasks.addRule("""Pattern: "embulk_<command>": Executes an Embulk command.""") { taskName ->
+            if (taskName.startsWith("embulk_")) {
+                project.tasks.create(taskName, JavaExec::class.java) { task ->
+                    task.dependsOn("embulkSetup")
+                    task.main = "-jar"
+
+                    val token = taskName.split("_".toRegex()).drop(1).toMutableList() // remove first 'embulk'
+                    val args = mutableListOf(extension.binFile.absolutePath)
+
+                    val command = token.removeAt(0)
+                    args.add(command)
+                    if (listOf("run", "cleanup", "preview", "guess").contains(command)) {
+                        task.dependsOn("package")
+                        args.add(extension.configYaml)
+
+                        if (command == "guess") {
+                            args.add("-o")
+                            args.add(extension.outputYaml)
+                        }
+                        args.add("-L")
+                        args.add(project.rootDir.absolutePath)
+                    }
+                    args.addAll(token)
+
+                    task.args(args)
+                }
+            }
         }
     }
 
