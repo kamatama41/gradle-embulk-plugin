@@ -8,11 +8,10 @@ import java.net.URL
 
 open class EmbulkSetupTask : DefaultTask() {
     lateinit var embulkVersion: String
-    lateinit var workDir: File
+    lateinit var binFile: File
 
     @TaskAction
     fun exec() {
-        val binFile = File("${workDir.absolutePath}/$embulkVersion/embulk")
         if (!binFile.exists()) {
             logger.debug("Setting Embulk version to $embulkVersion")
             val url = URL("https://dl.bintray.com/embulk/maven/embulk-$embulkVersion.jar")

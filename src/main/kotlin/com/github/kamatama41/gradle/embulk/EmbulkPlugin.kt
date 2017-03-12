@@ -10,6 +10,7 @@ import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.plugins.quality.Checkstyle
 import org.gradle.api.plugins.quality.CheckstyleExtension
 import org.gradle.api.tasks.Copy
+import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.bundling.Jar
 import java.io.File
 
@@ -42,6 +43,7 @@ class EmbulkPlugin : Plugin<Project> {
         cleanTask()
         checkstyleTask()
         setupEmbulkTask()
+        embulkExecTask()
         embulkDependencies()
     }
 
@@ -165,7 +167,38 @@ class EmbulkPlugin : Plugin<Project> {
             project.afterEvaluate {
                 task.group = groupName
                 task.embulkVersion = extension.embulkVersion
-                task.workDir = extension.workDir
+                task.binFile = extension.binFile
+            }
+        }
+    }
+
+    fun embulkExecTask() {
+        project.tasks.addRule("""Pattern: "embulk_<command>": Executes an Embulk command.""") { taskName ->
+            if (taskName.startsWith("embulk_")) {
+                project.tasks.create(taskName, JavaExec::class.java) { task ->
+                    task.dependsOn("embulkSetup")
+                    task.main = "-jar"
+
+                    val token = taskName.split("_".toRegex()).drop(1).toMutableList() // remove first 'embulk'
+                    val args = mutableListOf(extension.binFile.absolutePath)
+
+                    val command = token.removeAt(0)
+                    args.add(command)
+                    if (listOf("run", "cleanup", "preview", "guess").contains(command)) {
+                        task.dependsOn("package")
+                        args.add(extension.configYaml)
+
+                        if (command == "guess") {
+                            args.add("-o")
+                            args.add(extension.outputYaml)
+                        }
+                        args.add("-L")
+                        args.add(project.rootDir.absolutePath)
+                    }
+                    args.addAll(token)
+
+                    task.args(args)
+                }
             }
         }
     }

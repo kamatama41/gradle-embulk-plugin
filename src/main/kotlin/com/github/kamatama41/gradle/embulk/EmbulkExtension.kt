@@ -1,6 +1,7 @@
 package com.github.kamatama41.gradle.embulk
 
 import org.gradle.api.Project
+import java.io.File
 
 open class EmbulkExtension(project: Project) {
     lateinit var category: String
@@ -20,4 +21,7 @@ open class EmbulkExtension(project: Project) {
     var checkstyleIgnoreFailures = true
 
     var workDir = project.file("${project.projectDir.absolutePath}/.gradle/embulk")
+    val binFile get() = File("${workDir.absolutePath}/$embulkVersion/embulk")
+    var configYaml = "config.yml"
+    var outputYaml = "output.yml"
 }
