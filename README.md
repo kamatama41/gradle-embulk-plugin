@@ -1,28 +1,57 @@
 [![CircleCI](https://circleci.com/gh/kamatama41/gradle-embulk-plugin.svg?style=svg)](https://circleci.com/gh/kamatama41/gradle-embulk-plugin)
 
 # gradle-plugin-embulk
-Add tasks for [Embulk](http://www.embulk.org) plugin.
+Add tasks for [Embulk](http://www.embulk.org) plugin for Java.
 
-## Installation
+## Installation and configuration
 Add the snippets to your build.gradle
+
 ```gradle
 buildscript {
     repositories {
         maven { url 'http://kamatama41.github.com/maven-repository/repository' }
     }
     dependencies {
-        classpath "com.github.kamatama41:gradle-embulk-plugin:0.1.0"
+        classpath "com.github.kamatama41:gradle-embulk-plugin:<latest-version>"
     }
 }
+
 apply plugin: "com.github.kamatama41.embulk"
+
+embulk {
+    embulkVersion = "0.8.18"
+    category = "filter"
+    name = "myfilter"
+    homepage = "https://github.com/someuser/embulk-filter-myfilter"
+}
 ```
 
 ## Tasks
-TODO: Details
+- `classpath`: Copy jar files to classpath directory
+- `gemspec`: Generate a gemspec file for this plugin
+- `gem`: Generate a gem file
+- `package`: Generate a package to run this plugin locally 
+- `checkstyle`: Check code style
+- `gemPush`: Push gem file to rubygems.org
+- `embulkSetup`: Install embulk binary
+- `embulk_#{command}`: Run embulk command
 
-- classpath
-- gemspec
-- gem
-- package
-- checkstyle
-- gemPush
+### embulk_${command}
+You can run any embulk command with any arguments.
+
+#### Examples
+- `./gradlew embulk_run`
+  - This is equivalent to `embulk run config.yml -L .`
+
+- `./gradlew embulk_guess`
+  - This is equivalent to `embulk guess config.yml -o output.yml -L .`
+
+If you want to configure config and output yaml file name, you can do it with `configYaml` and `outputYaml` such as 
+
+```gradle
+embulk {
+    ....
+    configYaml = "myconfig.yml"
+    outputYaml = "myoutput.yml"
+}
+```
