@@ -18,4 +18,6 @@ open class EmbulkExtension(project: Project) {
     var checkstyleConfig = project.resources.text.fromFile("config/checkstyle/checkstyle.xml").asFile()
     var checkstyleDefaultConfig = project.resources.text.fromFile("config/checkstyle/default.xml").asFile()
     var checkstyleIgnoreFailures = true
+
+    var workDir = project.file("${project.projectDir.absolutePath}/.gradle/embulk")
 }

@@ -1,6 +1,7 @@
 package com.github.kamatama41.gradle.embulk
 
 import com.github.jrubygradle.JRubyPlugin
+import com.github.kamatama41.gradle.embulk.task.EmbulkSetupTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.internal.artifacts.dsl.DefaultRepositoryHandler
@@ -40,6 +41,7 @@ class EmbulkPlugin : Plugin<Project> {
         gemPushTask()
         cleanTask()
         checkstyleTask()
+        setupEmbulkTask()
         embulkDependencies()
     }
 
@@ -155,6 +157,16 @@ class EmbulkPlugin : Plugin<Project> {
             }
             project.dependencies.add("compile", "org.embulk:embulk-core:${extension.embulkVersion}")
             project.dependencies.add("provided", "org.embulk:embulk-core:${extension.embulkVersion}")
+        }
+    }
+
+    fun setupEmbulkTask() {
+        this.project.tasks.create("embulkSetup", EmbulkSetupTask::class.java) { task ->
+            project.afterEvaluate {
+                task.group = groupName
+                task.embulkVersion = extension.embulkVersion
+                task.workDir = extension.workDir
+            }
         }
     }
 
