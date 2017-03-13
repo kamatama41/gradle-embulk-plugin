@@ -9,6 +9,7 @@ Add the snippets to your build.gradle
 ```gradle
 buildscript {
     repositories {
+        jcenter()
         maven { url 'http://kamatama41.github.com/maven-repository/repository' }
     }
     dependencies {
