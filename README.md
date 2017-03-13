@@ -38,16 +38,20 @@ embulk {
 - `embulk_#{command}`: Run embulk command
 
 ### embulk_${command}
-You can run any embulk command with any arguments.
+You can run a embulk command with the task and specify any command argument with `_`.
+And this plugin implicitly set some config arguments when running commands such as `run` or `guess` so you don't need to specify config yaml path and project package path by default.
 
 #### Examples
+- `./gradlew embulk_--version`
+  - This is equivalent to `embulk --version`
+
 - `./gradlew embulk_run`
-  - This is equivalent to `embulk run config.yml -L .`
+  - This is equivalent to `embulk run config.yml -L <project_root>`
 
 - `./gradlew embulk_guess`
-  - This is equivalent to `embulk guess config.yml -o output.yml -L .`
+  - This is equivalent to `embulk guess config.yml -o output.yml -L <project_root>`
 
-If you want to configure config and output yaml file name, you can do it with `configYaml` and `outputYaml` such as 
+If you want to configure yaml file name, you can do it with the params `configYaml` and `outputYaml` such as 
 
 ```gradle
 embulk {
