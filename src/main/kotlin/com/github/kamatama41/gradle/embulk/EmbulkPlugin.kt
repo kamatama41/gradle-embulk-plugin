@@ -130,25 +130,27 @@ class EmbulkPlugin : Plugin<Project> {
 
     fun checkstyleTask() {
         project.plugins.apply("checkstyle")
-        project.extensions.configure(CheckstyleExtension::class.java) { checkstyle ->
-            checkstyle.configFile = extension.checkstyleConfig
-            checkstyle.toolVersion = extension.checkstyleVersion
-        }
+        project.afterEvaluate {
+            project.extensions.configure(CheckstyleExtension::class.java) { checkstyle ->
+                checkstyle.configFile = extension.checkstyleConfig
+                checkstyle.toolVersion = extension.checkstyleVersion
+            }
 
-        val checkstyleMain = project.tasks.findByName("checkstyleMain") as Checkstyle
-        checkstyleMain.configFile = extension.checkstyleDefaultConfig
-        checkstyleMain.ignoreFailures = extension.checkstyleIgnoreFailures
+            val checkstyleMain = project.tasks.findByName("checkstyleMain") as Checkstyle
+            checkstyleMain.configFile = extension.checkstyleDefaultConfig
+            checkstyleMain.ignoreFailures = extension.checkstyleIgnoreFailures
 
-        val checkstyleTest = project.tasks.findByName("checkstyleTest") as Checkstyle
-        checkstyleTest.configFile = extension.checkstyleDefaultConfig
-        checkstyleTest.ignoreFailures = extension.checkstyleIgnoreFailures
+            val checkstyleTest = project.tasks.findByName("checkstyleTest") as Checkstyle
+            checkstyleTest.configFile = extension.checkstyleDefaultConfig
+            checkstyleTest.ignoreFailures = extension.checkstyleIgnoreFailures
 
-        val sourceSets = project.the<JavaPluginConvention>().sourceSets
-        val main = sourceSets.findByName("main")
-        val test = sourceSets.findByName("test")
-        project.tasks.create("checkstyle", Checkstyle::class.java) { task ->
-            task.classpath = main.output + test.output
-            task.setSource(main.allSource + test.allSource)
+            val sourceSets = project.the<JavaPluginConvention>().sourceSets
+            val main = sourceSets.findByName("main")
+            val test = sourceSets.findByName("test")
+            project.tasks.create("checkstyle", Checkstyle::class.java) { task ->
+                task.classpath = main.output + test.output
+                task.setSource(main.allSource + test.allSource)
+            }
         }
     }
 
