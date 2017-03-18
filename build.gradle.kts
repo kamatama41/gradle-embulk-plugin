@@ -1,7 +1,7 @@
 import com.github.kamatama41.gradle.gitrelease.GitReleaseExtension
 
 buildscript {
-    val kotlinVersion = "1.1.0"
+    val kotlinVersion = "1.1.1"
     extra["kotlinVersion"] = kotlinVersion
     repositories {
         jcenter()
