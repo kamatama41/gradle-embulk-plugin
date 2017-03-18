@@ -12,6 +12,7 @@ import org.gradle.api.Task;
 public class JRubyExecTasks {
     static void gemPushTask(Project project, final EmbulkExtension extension) {
         final JRubyExec task = project.getTasks().create("gemPush", JRubyExec.class);
+        task.dependsOn("gem");
         task.setGroup(EmbulkPlugin.getGroupName());
 
         project.afterEvaluate(new Action<Project>() {
