@@ -1,6 +1,7 @@
 package com.github.kamatama41.gradle.embulk
 
 import com.github.jrubygradle.JRubyPlugin
+import org.apache.tools.ant.DirectoryScanner
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Rule
@@ -37,6 +38,7 @@ class EmbulkPlugin : Plugin<Project> {
         project.plugins.apply(JRubyPlugin::class.java)
         project.configurations.maybeCreate("provided")
 
+        newPluginTask()
         classpathTask()
         gemspecTask()
         gemTask()
@@ -47,6 +49,24 @@ class EmbulkPlugin : Plugin<Project> {
         setupEmbulkTask()
         embulkExecTask()
         embulkDependencies()
+    }
+
+    fun newPluginTask() {
+        project.tasks.create("newPlugin", Copy::class.java) { task ->
+            task.group = groupName
+            project.afterEvaluate {
+                task.dependsOn("embulk_new_java-${extension.category}_${extension.name}")
+                task.from("embulk-${extension.category}-${extension.name}") { spec ->
+                    DirectoryScanner.removeDefaultExclude("**/.gitignore")
+                    spec.include("lib/**", "src/**", "README.md", "LICENSE.txt", ".gitignore")
+                }
+                task.into(".")
+
+                task.doLast {
+                    project.delete("embulk-${extension.category}-${extension.name}")
+                }
+            }
+        }
     }
 
     fun classpathTask() {
