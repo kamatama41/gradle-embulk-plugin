@@ -6,7 +6,7 @@ buildscript {
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
-        classpath "com.github.kamatama41:gradle-git-release-plugin:0.1.0"
+        classpath "com.github.kamatama41:gradle-git-release-plugin:0.1.1"
     }
 }
 
