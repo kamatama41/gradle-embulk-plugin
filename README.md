@@ -1,7 +1,10 @@
 [![CircleCI](https://circleci.com/gh/kamatama41/gradle-embulk-plugin.svg?style=svg)](https://circleci.com/gh/kamatama41/gradle-embulk-plugin)
 
 # gradle-plugin-embulk
-Add tasks for [Embulk](http://www.embulk.org) plugin for Java.
+This Gradle plugin provides you with some tasks to help your [Embulk](http://www.embulk.org) plugin development.
+
+## Requirement
+- Gradle 3.2.1 or later
 
 ## Installation and configuration
 Add the snippets to your build.gradle
@@ -27,31 +30,39 @@ embulk {
 }
 ```
 
+So that you can generate your plugin template with the command `(./gradlew|gradle) newPlugin`
+
+## Dependencies
+This plugin automatically adds the following dependency into your project.
+- `org.embulk:embulk-core:<embulkVersion>`
+
 ## Tasks
+- `newPlugin`: Generate a new plugin template
 - `classpath`: Copy jar files to classpath directory
 - `gemspec`: Generate a gemspec file for this plugin
 - `gem`: Generate a gem file
-- `package`: Generate a package to run this plugin locally 
-- `checkstyle`: Check code style
+- `package`: Generate a package, which is needed to run this plugin locally 
+- `checkstyle`: Run a Checkstyle process
 - `gemPush`: Push gem file to rubygems.org
-- `embulkSetup`: Install embulk binary
-- `embulk_#{command}`: Run embulk command
+- `embulkSetup`: Install a version of Embulk, which you specified by `embulkVersion`
+- `embulk_#{command}`: Run an embulk command ([details](#embulk_command))
 
 ### embulk_${command}
-You can run a embulk command with the task and specify any command argument with `_`.
-And this plugin implicitly set some config arguments when running commands such as `run` or `guess` so you don't need to specify config yaml path and project package path by default.
+You can run an embulk command with a gradle task `embulk_*`, which can be added command arguments with `_`.
+Also, this plugin automatically sets some arguments when executing a command such as `run` or `guess`,
+so you don't have to specify yaml path and package path by default.
 
 #### Examples
-- `./gradlew embulk_--version`
+- `(./gradlew|gradle) embulk_--version`
   - This is equivalent to `embulk --version`
 
-- `./gradlew embulk_run`
+- `(./gradlew|gradle) embulk_run`
   - This is equivalent to `embulk run config.yml -L <project_root>`
 
-- `./gradlew embulk_guess`
+- `(./gradlew|gradle) embulk_guess`
   - This is equivalent to `embulk guess config.yml -o output.yml -L <project_root>`
 
-If you want to configure yaml file name, you can do it with the params `configYaml` and `outputYaml` such as 
+If you want to change `config.yml` or `output.yml` to other file name, you can do it with `configYaml` or `outputYaml` option such as the following
 
 ```gradle
 embulk {
