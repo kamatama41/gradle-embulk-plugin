@@ -143,9 +143,7 @@ class EmbulkPlugin : Plugin<Project> {
 
     fun cleanTask() {
         project.tasks.findByName("clean").apply {
-            doLast {
-                project.afterEvaluate { project.delete(classpathDir, gemspecFile) }
-            }
+            doLast { project.delete(classpathDir, gemspecFile) }
         }
     }
 
