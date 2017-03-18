@@ -173,7 +173,7 @@ class EmbulkPlugin : Plugin<Project> {
                 val binFile = extension.binFile
                 val embulkVersion = extension.embulkVersion
                 if (!binFile.exists()) {
-                    project.logger.debug("Setting Embulk version to $embulkVersion")
+                    println("Setting Embulk version to $embulkVersion")
 
                     val url = URL("https://dl.bintray.com/embulk/maven/embulk-$embulkVersion.jar")
                     url.openStream().use { input ->
