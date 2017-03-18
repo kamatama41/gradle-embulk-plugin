@@ -1,0 +1,38 @@
+buildscript {
+    ext.kotlinVersion = "1.1.1"
+    repositories {
+        jcenter()
+        maven { url "http://kamatama41.github.com/maven-repository/repository" }
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+        classpath "com.github.kamatama41:gradle-git-release-plugin:0.1.0"
+    }
+}
+
+apply plugin: "idea"
+apply plugin: "kotlin"
+apply plugin: "com.github.kamatama41.git-release"
+
+repositories {
+    jcenter()
+}
+
+sourceCompatibility = JavaVersion.VERSION_1_7
+targetCompatibility = JavaVersion.VERSION_1_7
+
+dependencies {
+    compile gradleApi()
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+    compile "org.eclipse.jgit:org.eclipse.jgit:4.3.1.201605051710-r"
+    compile "com.google.guava:guava:20.0"
+    compile "com.github.jruby-gradle:jruby-gradle-plugin:0.1.5"
+    testCompile "junit:junit:4.12"
+}
+
+gitRelease {
+    groupId = "com.github.kamatama41"
+    artifactId = "gradle-embulk-plugin"
+    repoUri = "git@github.com:kamatama41/maven-repository.git"
+    repoDir = file("${System.getProperty("user.home")}/gh-maven-repository")
+}

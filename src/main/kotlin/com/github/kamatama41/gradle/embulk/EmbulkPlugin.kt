@@ -3,6 +3,7 @@ package com.github.kamatama41.gradle.embulk
 import com.github.jrubygradle.JRubyPlugin
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.Rule
 import org.gradle.api.internal.artifacts.dsl.DefaultRepositoryHandler
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.JavaPluginConvention
@@ -192,34 +193,7 @@ class EmbulkPlugin : Plugin<Project> {
     }
 
     fun embulkExecTask() {
-        project.tasks.addRule("""Pattern: "embulk_<command>": Executes an Embulk command.""") { taskName ->
-            if (taskName.startsWith("embulk_")) {
-                project.tasks.create(taskName, JavaExec::class.java) { task ->
-                    task.dependsOn("embulkSetup")
-                    task.main = "-jar"
-
-                    val token = taskName.split("_".toRegex()).drop(1).toMutableList() // remove first 'embulk'
-                    val args = mutableListOf(extension.binFile.absolutePath)
-
-                    val command = token.removeAt(0)
-                    args.add(command)
-                    if (listOf("run", "cleanup", "preview", "guess").contains(command)) {
-                        task.dependsOn("package")
-                        args.add(extension.configYaml)
-
-                        if (command == "guess") {
-                            args.add("-o")
-                            args.add(extension.outputYaml)
-                        }
-                        args.add("-L")
-                        args.add(project.rootDir.absolutePath)
-                    }
-                    args.addAll(token)
-
-                    task.args(args)
-                }
-            }
-        }
+        project.tasks.addRule(EmbulkExecRule(project, extension))
     }
 
     private fun generateAuthors(extension: EmbulkExtension): String {
@@ -249,6 +223,39 @@ class EmbulkPlugin : Plugin<Project> {
             "encoder" -> "Encodes files using ${extension.name} for other file output plugins."
             "filter" -> extension.name
             else -> extension.name
+        }
+    }
+
+    class EmbulkExecRule(val project: Project, val extension: EmbulkExtension) : Rule {
+        override fun getDescription() = """Pattern: "embulk_<command>": Executes an Embulk command."""
+
+        override fun apply(taskName: String) {
+            if (taskName.startsWith("embulk_")) {
+                project.tasks.create(taskName, JavaExec::class.java) { task ->
+                    task.dependsOn("embulkSetup")
+                    task.main = "-jar"
+
+                    val token = taskName.split("_".toRegex()).drop(1).toMutableList() // remove first 'embulk'
+                    val args = mutableListOf(extension.binFile.absolutePath)
+
+                    val command = token.removeAt(0)
+                    args.add(command)
+                    if (listOf("run", "cleanup", "preview", "guess").contains(command)) {
+                        task.dependsOn("package")
+                        args.add(extension.configYaml)
+
+                        if (command == "guess") {
+                            args.add("-o")
+                            args.add(extension.outputYaml)
+                        }
+                        args.add("-L")
+                        args.add(project.rootDir.absolutePath)
+                    }
+                    args.addAll(token)
+
+                    task.args(args)
+                }
+            }
         }
     }
 }
