@@ -23,7 +23,7 @@ buildscript {
 apply plugin: "com.github.kamatama41.embulk"
 
 embulk {
-    embulkVersion = "0.8.18"
+    version = "0.8.18"
     category = "filter"
     name = "myfilter"
     homepage = "https://github.com/someuser/embulk-filter-myfilter"
@@ -34,7 +34,7 @@ So that you can generate your plugin template with the command `(./gradlew|gradl
 
 ## Dependencies
 This plugin automatically adds the following dependency into your project.
-- `org.embulk:embulk-core:<embulkVersion>`
+- `org.embulk:embulk-core:<version>`
 
 ## Tasks
 - `newPlugin`: Generate a new plugin template
@@ -44,7 +44,7 @@ This plugin automatically adds the following dependency into your project.
 - `package`: Generate a package, which is needed to run this plugin locally 
 - `checkstyle`: Run a Checkstyle process
 - `gemPush`: Push gem file to rubygems.org
-- `embulkSetup`: Install a version of Embulk, which you specified by `embulkVersion`
+- `embulkSetup`: Install a version of Embulk, which you specified by `version`
 - `embulk_#{command}`: Run an embulk command ([details](#embulk_command))
 
 ### embulk_${command}

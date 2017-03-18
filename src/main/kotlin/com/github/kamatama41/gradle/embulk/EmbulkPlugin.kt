@@ -181,8 +181,8 @@ class EmbulkPlugin : Plugin<Project> {
             if (jcenter == null) {
                 project.repositories.add(project.repositories.jcenter())
             }
-            project.dependencies.add("compile", "org.embulk:embulk-core:${extension.embulkVersion}")
-            project.dependencies.add("provided", "org.embulk:embulk-core:${extension.embulkVersion}")
+            project.dependencies.add("compile", "org.embulk:embulk-core:${extension.version}")
+            project.dependencies.add("provided", "org.embulk:embulk-core:${extension.version}")
         }
     }
 
@@ -192,7 +192,7 @@ class EmbulkPlugin : Plugin<Project> {
 
             task.doLast {
                 val binFile = extension.binFile
-                val embulkVersion = extension.embulkVersion
+                val embulkVersion = extension.version
                 if (!binFile.exists()) {
                     println("Setting Embulk version to $embulkVersion")
 
