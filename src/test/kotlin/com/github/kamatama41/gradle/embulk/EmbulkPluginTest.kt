@@ -1,20 +1,25 @@
 package com.github.kamatama41.gradle.embulk
 
-import org.eclipse.jgit.internal.storage.file.FileRepository
-import org.eclipse.jgit.junit.RepositoryTestCase
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
+import org.hamcrest.CoreMatchers.`is`
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertThat
 import org.junit.Assert.assertTrue
+import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TemporaryFolder
 import java.io.File
 
-class EmbulkPluginTest : RepositoryTestCase() {
-    lateinit var testProjectDir: FileRepository
-    val projectDir by lazy { File("${testProjectDir.directory}/..") }
+class EmbulkPluginTest {
+    @Rule @JvmField
+    val testProjectDir = TemporaryFolder()
+    val projectDir by lazy { testProjectDir.root!! }
     val buildDir by lazy { "${projectDir.absolutePath}/build/embulk" }
 
-    override fun setUp() {
-        super.setUp()
+    @Before
+    fun setUp() {
         setupProject()
     }
 
@@ -22,7 +27,32 @@ class EmbulkPluginTest : RepositoryTestCase() {
     fun classpath() {
         build("classpath")
         // Check generated a Jar file
-        assertTrue(File("$projectDir/classpath/embulk-filter-myfilter-0.1.0.jar").exists())
+        assertTrue(File("$projectDir/classpath/embulk-input-xlsx-0.1.0.jar").exists())
+    }
+
+    @Test
+    fun gemspec() {
+        build("gemspec")
+        assertThat(projectFile("embulk-input-xlsx.gemspec").readText(), `is`("""
+            |Gem::Specification.new do |spec|
+            |  spec.name          = "embulk-input-xlsx"
+            |  spec.version       = "0.1.0"
+            |  spec.authors       = ["Author 1", "Author 2"]
+            |  spec.summary       = %[Xlsx file input plugin for Embulk]
+            |  spec.description   = %[Reads files stored on xlsx.]
+            |  spec.email         = ["auser@example.com"]
+            |  spec.licenses      = ["MIT"]
+            |  spec.homepage      = "https://github.com/someuser/embulk-input-xlsx"
+            |
+            |  spec.files         = `git ls-files`.split("\n") + Dir["classpath/*.jar"]
+            |  spec.test_files    = spec.files.grep(%r"^(test|spec)/")
+            |  spec.require_paths = ["lib"]
+            |
+            |  #spec.add_dependency 'YOUR_GEM_DEPENDENCY', ['~> YOUR_GEM_DEPENDENCY_VERSION']
+            |  spec.add_development_dependency 'bundler', ['~> 1.0']
+            |  spec.add_development_dependency 'rake', ['>= 10.0']
+            |end
+        """.trimMargin()))
     }
 
     @Test
@@ -40,32 +70,47 @@ class EmbulkPluginTest : RepositoryTestCase() {
     //////////////////////////////////////////////////////////////
 
     private fun setupProject() {
-        testProjectDir = createWorkRepository()
-        createFile("build.gradle").writeText("""
+        projectFile("build.gradle").writeText("""
             plugins { id "com.github.kamatama41.embulk" }
 
             version = "0.1.0"
 
             embulk {
                 version = "0.8.18"
-                category = "filter"
-                name = "myfilter"
-                homepage = "https://github.com/someuser/embulk-filter-myfilter"
+                category = "file-input"
+                name = "xlsx"
+                authors = ["Author 1", "Author 2"]
+                email = "auser@example.com"
+                homepage = "https://github.com/someuser/embulk-input-xlsx"
             }
         """)
-        createFile("settings.gradle").writeText("""rootProject.name = 'embulk-filter-myfilter'""")
+        projectFile("settings.gradle").writeText("""rootProject.name = 'embulk-input-xlsx'""")
 
         // Generate new plugin codes
         build("newPlugin")
         assertTrue(File("$projectDir", "README.md").exists())
         assertTrue(File("$projectDir", "LICENSE.txt").exists())
         assertTrue(File("$projectDir", ".gitignore").exists())
-        assertTrue(File("$projectDir", "lib/embulk/filter/myfilter.rb").exists())
-        assertTrue(File("$projectDir", "src/main/java/org/embulk/filter/myfilter/MyFilterFilterPlugin.java").exists())
+        assertTrue(File("$projectDir", "lib/embulk/input/xlsx.rb").exists())
+        assertTrue(File("$projectDir", "src/main/java/org/embulk/input/xlsx/XlsxFileInputPlugin.java").exists())
+        assertFalse(File("$projectDir", "embulk-input-xlsx").exists())
     }
 
-    private fun build(vararg args: String): BuildResult = newRunner(*args, "--stacktrace").build()
-    private fun buildAndFail(vararg args: String): BuildResult = newRunner(*args, "--stacktrace").buildAndFail()
+    private fun build(vararg args: String): BuildResult {
+        val result = newRunner(*args, "--stacktrace").build()
+        println("===========================================")
+        println(result.output)
+        println("===========================================")
+        return result
+    }
+
+    private fun buildAndFail(vararg args: String): BuildResult {
+        val result = newRunner(*args, "--stacktrace").buildAndFail()
+        println("===========================================")
+        println(result.output)
+        println("===========================================")
+        return result
+    }
 
     private fun newRunner(vararg args: String): GradleRunner = GradleRunner.create()
             .withProjectDir(projectDir)
@@ -73,5 +118,5 @@ class EmbulkPluginTest : RepositoryTestCase() {
             .withDebug(true)
             .withPluginClasspath()
 
-    private fun createFile(name: String) = File(projectDir, name)
+    private fun projectFile(name: String) = File(projectDir, name)
 }

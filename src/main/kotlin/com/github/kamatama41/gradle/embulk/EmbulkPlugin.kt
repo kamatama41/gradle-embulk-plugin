@@ -21,7 +21,6 @@ import java.net.URL
 class EmbulkPlugin : Plugin<Project> {
     lateinit var project: Project
     lateinit var extension: EmbulkExtension
-    lateinit var git: Git
     val extensionName = "embulk"
     val classpathDir = "classpath"
     val gemspecFile: File by lazy { project.file("${project.name}.gemspec") }
@@ -34,7 +33,6 @@ class EmbulkPlugin : Plugin<Project> {
     override fun apply(project: Project) {
         this.project = project
         this.extension = project.extensions.create(extensionName, EmbulkExtension::class.java, project)
-        this.git = Git.new(project.rootProject.rootDir)
         project.plugins.apply(JavaPlugin::class.java)
         project.plugins.apply(JRubyPlugin::class.java)
         project.plugins.apply(CheckstylePlugin::class.java)
@@ -58,14 +56,16 @@ class EmbulkPlugin : Plugin<Project> {
             task.group = groupName
             project.afterEvaluate {
                 task.dependsOn("embulk_new_java-${extension.category}_${extension.name}")
-                task.from("embulk-${extension.category}-${extension.name}") { spec ->
+
+                val pluginName = "embulk-${extension.embulkCategory}-${extension.name}"
+                task.from(pluginName) { spec ->
                     DirectoryScanner.removeDefaultExclude("**/.gitignore")
                     spec.include("lib/**", "src/**", "README.md", "LICENSE.txt", ".gitignore")
                 }
                 task.into(".")
 
                 task.doLast {
-                    project.delete("embulk-${extension.category}-${extension.name}")
+                    project.delete(pluginName)
                 }
             }
         }
@@ -100,17 +100,16 @@ class EmbulkPlugin : Plugin<Project> {
 
                 task.inputs.file("build.gradle")
                 task.outputs.file(gemspecFile)
-                git.config()
 
                 task.doLast {
                     gemspecFile.writeText("""
                         |Gem::Specification.new do |spec|
                         |  spec.name          = "${project.name}"
                         |  spec.version       = "${project.version}"
-                        |  spec.authors       = ["${generateAuthors(extension)}"]
-                        |  spec.summary       = %[${generateSummary(extension)}]
-                        |  spec.description   = %[${generateDescription(extension)}]
-                        |  spec.email         = ["${generateEmail(extension)}"]
+                        |  spec.authors       = ["${extension.authors.joinToString("\", \"")}"]
+                        |  spec.summary       = %[${generateSummary()}]
+                        |  spec.description   = %[${generateDescription()}]
+                        |  spec.email         = ["${extension.email}"]
                         |  spec.licenses      = ["${extension.licenses.joinToString()}"]
                         |  spec.homepage      = "${extension.homepage}"
                         |
@@ -218,29 +217,17 @@ class EmbulkPlugin : Plugin<Project> {
         project.tasks.addRule(EmbulkExecRule(project, extension))
     }
 
-    private fun generateAuthors(extension: EmbulkExtension): String {
-        return if (extension.authors.isEmpty()) {
-            this.git.config().getString("user", null, "name")
-        } else {
-            extension.authors.joinToString()
-        }
-    }
+    private fun generateSummary(): String
+            = extension.summary ?: "${extension.name.toUpperCamel()} ${extension.category.replace("-", " ")} plugin for Embulk"
 
-    private fun generateEmail(extension: EmbulkExtension): String
-            = extension.email ?: this.git.config().getString("user", null, "email")
-
-    private fun generateSummary(extension: EmbulkExtension): String {
-        return extension.summary ?: "${extension.name.toUpperCamel()} ${extension.category} plugin for Embulk"
-    }
-
-    private fun generateDescription(extension: EmbulkExtension): String {
+    private fun generateDescription(): String {
         return extension.description ?: when (extension.category) {
             "input" -> "Loads records from ${extension.name}."
-            "file_input" -> "Reads files stored on ${extension.name}."
+            "file-input" -> "Reads files stored on ${extension.name}."
             "parser" -> "Parses ${extension.name} files read by other file input plugins."
             "decoder" -> "Decodes ${extension.name}}-encoded files read by other file input plugins."
             "output" -> "Dumps records to ${extension.name}."
-            "file_output" -> "Stores files on ${extension.name}."
+            "file-output" -> "Stores files on ${extension.name}."
             "formatter" -> "Formats ${extension.name} files for other file output plugins."
             "encoder" -> "Encodes files using ${extension.name} for other file output plugins."
             "filter" -> extension.name
