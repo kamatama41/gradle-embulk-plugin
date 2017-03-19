@@ -1,5 +1,7 @@
 package com.github.kamatama41.gradle.embulk
 
+import org.eclipse.jgit.internal.storage.file.FileRepository
+import org.eclipse.jgit.junit.RepositoryTestCase
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.hamcrest.CoreMatchers.`is`
@@ -7,20 +9,16 @@ import org.hamcrest.CoreMatchers.containsString
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertThat
 import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
-import org.junit.rules.TemporaryFolder
 import java.io.File
 
-class EmbulkPluginTest {
-    @Rule @JvmField
-    val testProjectDir = TemporaryFolder()
-    val projectDir by lazy { testProjectDir.root!! }
+class EmbulkPluginTest : RepositoryTestCase() {
+    lateinit var testProjectDir: FileRepository
+    val projectDir by lazy { File("${testProjectDir.directory}/..") }
     val buildDir by lazy { "${projectDir.absolutePath}/build/embulk" }
 
-    @Before
-    fun setUp() {
+    override fun setUp() {
+        super.setUp()
         setupProject()
     }
 
@@ -37,11 +35,12 @@ class EmbulkPluginTest {
     }
 
     @Test
-    fun packageTask() {
+    fun gemTask() {
         build("newPlugin")
-        build("package")
+        build("gem")
         // Check a Jar file was generated
         assertTrue(File("$projectDir/classpath/embulk-input-xlsx-0.1.0.jar").exists())
+
         // Check a content of generated gemspec file
         assertThat(projectFile("embulk-input-xlsx.gemspec").readText(), `is`("""
             |Gem::Specification.new do |spec|
@@ -63,6 +62,9 @@ class EmbulkPluginTest {
             |  spec.add_development_dependency 'rake', ['>= 10.0']
             |end
         """.trimMargin()))
+
+        // Check a Gem file was generated
+        assertTrue(File("$projectDir/pkg/embulk-input-xlsx-0.1.0.gem").exists())
     }
 
     @Test
@@ -99,6 +101,7 @@ class EmbulkPluginTest {
     //////////////////////////////////////////////////////////////
 
     private fun setupProject() {
+        testProjectDir = createWorkRepository()
         projectFile("build.gradle").writeText("""
             plugins { id "com.github.kamatama41.embulk" }
 

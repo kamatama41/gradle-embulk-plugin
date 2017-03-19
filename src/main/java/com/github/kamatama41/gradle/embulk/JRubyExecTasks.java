@@ -5,6 +5,8 @@ import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 
+import java.io.File;
+
 /**
  * Why is this class needed?
  * => For some reason, com.github.jrubygradle.JRubyExec cannot be loaded on Kotlin
@@ -20,7 +22,7 @@ public class JRubyExecTasks {
             public void execute(Project project) {
                 task.setJrubyVersion(extension.getJrubyVersion());
                 task.jrubyArgs("-rrubygems/gem_runner", "-eGem::GemRunner.new.run(ARGV)", "push");
-                task.setScript(String.format("pkg/%s-%s.gem", project.getName(), project.getVersion()));
+                task.setScript(project.file(String.format("pkg/%s-%s.gem", project.getName(), project.getVersion())));
 
                 JRubyExec.updateJRubyDependencies(project);
             }
@@ -37,15 +39,20 @@ public class JRubyExecTasks {
             public void execute(final Project project) {
                 task.setJrubyVersion(extension.getJrubyVersion());
                 task.jrubyArgs("-rrubygems/gem_runner", "-eGem::GemRunner.new.run(ARGV)", "build");
-                task.setScript(project.getName() + ".gemspec");
+                task.setScript(project.file(project.getName() + ".gemspec"));
 
                 task.doLast(new Action<Task>() {
                     @Override
                     public void execute(Task task) {
                         String gemFile = String.format("%s-%s.gem", project.getName(), project.getVersion());
-                        boolean renamed = project.file(gemFile).renameTo(project.file("pkg/" + gemFile));
-                        if(!renamed) {
-                            project.getLogger().warn("File was not renamed.");
+                        File dst = project.file("pkg/" + gemFile);
+                        if(!dst.getParentFile().exists()) {
+                            if(!dst.getParentFile().mkdirs()) {
+                                throw new IllegalStateException("Prent dir was not made.");
+                            }
+                        }
+                        if(!project.file(gemFile).renameTo(project.file("pkg/" + gemFile))) {
+                            throw new IllegalStateException("File was not renamed.");
                         }
                     }
                 });
