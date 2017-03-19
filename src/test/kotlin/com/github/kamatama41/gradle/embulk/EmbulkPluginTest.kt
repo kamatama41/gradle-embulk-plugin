@@ -24,15 +24,11 @@ class EmbulkPluginTest {
     }
 
     @Test
-    fun classpath() {
-        build("classpath")
-        // Check generated a Jar file
+    fun packageTask() {
+        build("package")
+        // Check a Jar file was generated
         assertTrue(File("$projectDir/classpath/embulk-input-xlsx-0.1.0.jar").exists())
-    }
-
-    @Test
-    fun gemspec() {
-        build("gemspec")
+        // Check a content of generated gemspec file
         assertThat(projectFile("embulk-input-xlsx.gemspec").readText(), `is`("""
             |Gem::Specification.new do |spec|
             |  spec.name          = "embulk-input-xlsx"
@@ -56,7 +52,7 @@ class EmbulkPluginTest {
     }
 
     @Test
-    fun checkstyle() {
+    fun checkstyleTask() {
         // Generated plugin Java code has checkstyle error by default, so it will fail.
         buildAndFail("checkstyle")
 
