@@ -82,6 +82,7 @@ class EmbulkPluginTest {
                 authors = ["Author 1", "Author 2"]
                 email = "auser@example.com"
                 homepage = "https://github.com/someuser/embulk-input-xlsx"
+                workDir = file("${File("./.gradle/embulk").absolutePath}")
             }
         """)
         projectFile("settings.gradle").writeText("""rootProject.name = 'embulk-input-xlsx'""")
