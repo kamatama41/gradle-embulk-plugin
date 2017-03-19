@@ -25,6 +25,8 @@ open class EmbulkExtension(project: Project) {
     var configYaml = "config.yml"
     var outputYaml = "output.yml"
 
+    val displayName get() = name.toUpperCamel()
+    val displayCategory get() = category.replace("-", " ")
     val embulkCategory get() = when(category) {
         "file-input" -> "input"
         "file-output" -> "output"

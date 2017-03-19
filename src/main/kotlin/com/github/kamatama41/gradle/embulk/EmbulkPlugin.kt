@@ -218,7 +218,7 @@ class EmbulkPlugin : Plugin<Project> {
     }
 
     private fun generateSummary(): String
-            = extension.summary ?: "${extension.name.toUpperCamel()} ${extension.category.replace("-", " ")} plugin for Embulk"
+            = extension.summary ?: "${extension.displayName} ${extension.displayCategory} plugin for Embulk"
 
     private fun generateDescription(): String {
         return extension.description ?: when (extension.category) {
