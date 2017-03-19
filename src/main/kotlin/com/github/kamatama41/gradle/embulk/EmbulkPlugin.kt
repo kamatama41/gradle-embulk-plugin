@@ -10,6 +10,7 @@ import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.plugins.quality.Checkstyle
 import org.gradle.api.plugins.quality.CheckstyleExtension
+import org.gradle.api.plugins.quality.CheckstylePlugin
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.bundling.Jar
@@ -36,6 +37,7 @@ class EmbulkPlugin : Plugin<Project> {
         this.git = Git.new(project.rootProject.rootDir)
         project.plugins.apply(JavaPlugin::class.java)
         project.plugins.apply(JRubyPlugin::class.java)
+        project.plugins.apply(CheckstylePlugin::class.java)
         project.configurations.maybeCreate("provided")
 
         newPluginTask()
@@ -148,19 +150,21 @@ class EmbulkPlugin : Plugin<Project> {
     }
 
     fun checkstyleTask() {
-        project.plugins.apply("checkstyle")
         project.afterEvaluate {
+            val config = extension.checkstyleConfig ?: getConfigFromResources("checkstyle/checkstyle.xml")
+            val defaultConfig = extension.checkstyleDefaultConfig ?: getConfigFromResources("checkstyle/default.xml")
+
             project.extensions.configure(CheckstyleExtension::class.java) { checkstyle ->
-                checkstyle.configFile = extension.checkstyleConfig
+                checkstyle.configFile = config
                 checkstyle.toolVersion = extension.checkstyleVersion
             }
 
             val checkstyleMain = project.tasks.findByName("checkstyleMain") as Checkstyle
-            checkstyleMain.configFile = extension.checkstyleDefaultConfig
+            checkstyleMain.configFile = defaultConfig
             checkstyleMain.ignoreFailures = extension.checkstyleIgnoreFailures
 
             val checkstyleTest = project.tasks.findByName("checkstyleTest") as Checkstyle
-            checkstyleTest.configFile = extension.checkstyleDefaultConfig
+            checkstyleTest.configFile = defaultConfig
             checkstyleTest.ignoreFailures = extension.checkstyleIgnoreFailures
 
             val sourceSets = project.the<JavaPluginConvention>().sourceSets
@@ -242,6 +246,23 @@ class EmbulkPlugin : Plugin<Project> {
             "filter" -> extension.name
             else -> extension.name
         }
+    }
+
+    private fun getConfigFromResources(path: String): File {
+        val tmpConfig = project.file("${project.buildDir.absolutePath}/embulk/config/$path")
+        if (!tmpConfig.parentFile.exists()) {
+            tmpConfig.parentFile.mkdirs()
+        }
+        tmpConfig.delete()
+        tmpConfig.createNewFile()
+
+        this.javaClass.classLoader.getResourceAsStream("config/$path").use { input ->
+            FileOutputStream(tmpConfig).use { output ->
+                input.copyTo(output)
+            }
+        }
+
+        return tmpConfig
     }
 
     class EmbulkExecRule(val project: Project, val extension: EmbulkExtension) : Rule {

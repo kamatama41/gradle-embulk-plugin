@@ -16,8 +16,8 @@ open class EmbulkExtension(project: Project) {
     var jrubyVersion = "1.7.19" // TODO: update (currently v9.1.x)
 
     var checkstyleVersion = "6.14.1"
-    var checkstyleConfig = project.resources.text.fromFile("config/checkstyle/checkstyle.xml").asFile()
-    var checkstyleDefaultConfig = project.resources.text.fromFile("config/checkstyle/default.xml").asFile()
+    var checkstyleConfig : File? = null
+    var checkstyleDefaultConfig : File? = null
     var checkstyleIgnoreFailures = true
 
     var workDir = project.file("${project.projectDir.absolutePath}/.gradle/embulk")
