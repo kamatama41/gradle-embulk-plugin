@@ -3,6 +3,7 @@ package com.github.kamatama41.gradle.embulk
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.hamcrest.CoreMatchers.`is`
+import org.hamcrest.CoreMatchers.containsString
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertThat
 import org.junit.Assert.assertTrue
@@ -24,8 +25,19 @@ class EmbulkPluginTest {
     }
 
     @Test
+    fun newPluginTask() {
+        build("newPlugin")
+        assertTrue(File("$projectDir", "README.md").exists())
+        assertTrue(File("$projectDir", "LICENSE.txt").exists())
+        assertTrue(File("$projectDir", ".gitignore").exists())
+        assertTrue(File("$projectDir", "lib/embulk/input/xlsx.rb").exists())
+        assertTrue(File("$projectDir", "src/main/java/org/embulk/input/xlsx/XlsxFileInputPlugin.java").exists())
+        assertFalse(File("$projectDir", "embulk-input-xlsx").exists())
+    }
+
+    @Test
     fun packageTask() {
-        build("package")
+        build("newPlugin", "package")
         // Check a Jar file was generated
         assertTrue(File("$projectDir/classpath/embulk-input-xlsx-0.1.0.jar").exists())
         // Check a content of generated gemspec file
@@ -52,9 +64,28 @@ class EmbulkPluginTest {
     }
 
     @Test
+    fun runEmbulkTask() {
+        projectFile("config.yml").writeText("""
+            |in:
+            |  type: xlsx
+            |  option1: 1
+            |  option2: opt2
+            |  option3: opt3
+            |  parser:
+            |    type: csv
+            |    columns: []
+            |out: {type: stdout}
+        """.trimMargin())
+
+        // Run will fail because of UnsupportedOperationException
+        val result = buildAndFail("newPlugin", "embulk_run")
+        assertThat(result.output, containsString("Caused by: java.lang.UnsupportedOperationException: XlsxFileInputPlugin.open method is not implemented yet"))
+    }
+
+    @Test
     fun checkstyleTask() {
         // Generated plugin Java code has checkstyle error by default, so it will fail.
-        buildAndFail("checkstyle")
+        buildAndFail("newPlugin", "checkstyle")
 
         // Check generated checkstyle.xml and default.xml to build dir.
         assertTrue(File("$buildDir/config/checkstyle/checkstyle.xml").exists())
@@ -82,15 +113,6 @@ class EmbulkPluginTest {
             }
         """)
         projectFile("settings.gradle").writeText("""rootProject.name = 'embulk-input-xlsx'""")
-
-        // Generate new plugin codes
-        build("newPlugin")
-        assertTrue(File("$projectDir", "README.md").exists())
-        assertTrue(File("$projectDir", "LICENSE.txt").exists())
-        assertTrue(File("$projectDir", ".gitignore").exists())
-        assertTrue(File("$projectDir", "lib/embulk/input/xlsx.rb").exists())
-        assertTrue(File("$projectDir", "src/main/java/org/embulk/input/xlsx/XlsxFileInputPlugin.java").exists())
-        assertFalse(File("$projectDir", "embulk-input-xlsx").exists())
     }
 
     private fun build(vararg args: String): BuildResult {
