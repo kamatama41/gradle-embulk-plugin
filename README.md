@@ -24,9 +24,11 @@ apply plugin: "com.github.kamatama41.embulk"
 
 embulk {
     version = "0.8.18"
-    category = "filter"
-    name = "myfilter"
-    homepage = "https://github.com/someuser/embulk-filter-myfilter"
+    category = "file-input"
+    name = "xlsx"
+    authors = ["A User"]
+    email = "a.user@example.com"
+    homepage = "https://github.com/a.user/embulk-input-xlsx"
 }
 ```
 
