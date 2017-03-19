@@ -19,6 +19,13 @@ class EmbulkPluginTest : RepositoryTestCase() {
     }
 
     @Test
+    fun classpath() {
+        build("classpath")
+        // Check generated a Jar file
+        assertTrue(File("$projectDir/classpath/embulk-filter-myfilter-0.1.0.jar").exists())
+    }
+
+    @Test
     fun checkstyle() {
         // Generated plugin Java code has checkstyle error by default, so it will fail.
         buildAndFail("checkstyle")
@@ -28,10 +35,16 @@ class EmbulkPluginTest : RepositoryTestCase() {
         assertTrue(File("$buildDir/config/checkstyle/default.xml").exists())
     }
 
+    //////////////////////////////////////////////////////////////
+    // Helper functions
+    //////////////////////////////////////////////////////////////
+
     private fun setupProject() {
         testProjectDir = createWorkRepository()
         createFile("build.gradle").writeText("""
             plugins { id "com.github.kamatama41.embulk" }
+
+            version = "0.1.0"
 
             embulk {
                 version = "0.8.18"
@@ -40,7 +53,9 @@ class EmbulkPluginTest : RepositoryTestCase() {
                 homepage = "https://github.com/someuser/embulk-filter-myfilter"
             }
         """)
+        createFile("settings.gradle").writeText("""rootProject.name = 'embulk-filter-myfilter'""")
 
+        // Generate new plugin codes
         build("newPlugin")
         assertTrue(File("$projectDir", "README.md").exists())
         assertTrue(File("$projectDir", "LICENSE.txt").exists())
