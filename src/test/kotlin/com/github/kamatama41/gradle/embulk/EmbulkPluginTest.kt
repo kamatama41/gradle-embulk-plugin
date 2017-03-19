@@ -1,23 +1,62 @@
 package com.github.kamatama41.gradle.embulk
 
-import org.gradle.api.Project
-import org.gradle.api.tasks.Copy
-import org.gradle.testfixtures.ProjectBuilder
+import org.eclipse.jgit.internal.storage.file.FileRepository
+import org.eclipse.jgit.junit.RepositoryTestCase
+import org.gradle.testkit.runner.BuildResult
+import org.gradle.testkit.runner.GradleRunner
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import java.nio.file.Files
+import java.io.File
 
-class EmbulkPluginTest {
-    val project: Project by lazy {
-        val tmpDir = Files.createTempDirectory("gradle-embulk-plugin").toFile()
-        Git.init(tmpDir)
-        val project = ProjectBuilder.builder().withProjectDir(tmpDir).build()
-        project.pluginManager.apply("com.github.kamatama41.embulk")
-        project
+class EmbulkPluginTest : RepositoryTestCase() {
+    lateinit var testProjectDir: FileRepository
+    val projectDir by lazy { File("${testProjectDir.directory}/..") }
+    val buildDir by lazy { "${projectDir.absolutePath}/build/embulk" }
+
+    override fun setUp() {
+        super.setUp()
+        setupProject()
     }
 
-    @Test fun classpath() {
-        val classpath = project.tasks.findByName("classpath")
-        assertTrue("classpath is a Copy task", classpath is Copy)
+    @Test
+    fun checkstyle() {
+        // Generated plugin Java code has checkstyle error by default, so it will fail.
+        buildAndFail("checkstyle")
+
+        // Check generated checkstyle.xml and default.xml to build dir.
+        assertTrue(File("$buildDir/config/checkstyle/checkstyle.xml").exists())
+        assertTrue(File("$buildDir/config/checkstyle/default.xml").exists())
     }
+
+    private fun setupProject() {
+        testProjectDir = createWorkRepository()
+        createFile("build.gradle").writeText("""
+            plugins { id "com.github.kamatama41.embulk" }
+
+            embulk {
+                version = "0.8.18"
+                category = "filter"
+                name = "myfilter"
+                homepage = "https://github.com/someuser/embulk-filter-myfilter"
+            }
+        """)
+
+        build("newPlugin")
+        assertTrue(File("$projectDir", "README.md").exists())
+        assertTrue(File("$projectDir", "LICENSE.txt").exists())
+        assertTrue(File("$projectDir", ".gitignore").exists())
+        assertTrue(File("$projectDir", "lib/embulk/filter/myfilter.rb").exists())
+        assertTrue(File("$projectDir", "src/main/java/org/embulk/filter/myfilter/MyFilterFilterPlugin.java").exists())
+    }
+
+    private fun build(vararg args: String): BuildResult = newRunner(*args, "--stacktrace").build()
+    private fun buildAndFail(vararg args: String): BuildResult = newRunner(*args, "--stacktrace").buildAndFail()
+
+    private fun newRunner(vararg args: String): GradleRunner = GradleRunner.create()
+            .withProjectDir(projectDir)
+            .withArguments(*args)
+            .withDebug(true)
+            .withPluginClasspath()
+
+    private fun createFile(name: String) = File(projectDir, name)
 }
