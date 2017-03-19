@@ -37,3 +37,7 @@ gitRelease {
     repoUri = "git@github.com:kamatama41/maven-repository.git"
     repoDir = file("${System.getProperty("user.home")}/gh-maven-repository")
 }
+
+gradlePlugin {
+    automatedPublishing = false
+}
