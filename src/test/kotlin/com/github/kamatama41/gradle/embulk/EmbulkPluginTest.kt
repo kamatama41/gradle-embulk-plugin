@@ -32,12 +32,14 @@ class EmbulkPluginTest {
         assertTrue(File("$projectDir", ".gitignore").exists())
         assertTrue(File("$projectDir", "lib/embulk/input/xlsx.rb").exists())
         assertTrue(File("$projectDir", "src/main/java/org/embulk/input/xlsx/XlsxFileInputPlugin.java").exists())
+        assertTrue(File("$projectDir", "gradle.properties").exists())
         assertFalse(File("$projectDir", "embulk-input-xlsx").exists())
     }
 
     @Test
     fun packageTask() {
-        build("newPlugin", "package")
+        build("newPlugin")
+        build("package")
         // Check a Jar file was generated
         assertTrue(File("$projectDir/classpath/embulk-input-xlsx-0.1.0.jar").exists())
         // Check a content of generated gemspec file
@@ -100,8 +102,6 @@ class EmbulkPluginTest {
         projectFile("build.gradle").writeText("""
             plugins { id "com.github.kamatama41.embulk" }
 
-            version = "0.1.0"
-
             embulk {
                 version = "0.8.18"
                 category = "file-input"
@@ -112,7 +112,7 @@ class EmbulkPluginTest {
                 workDir = file("${File("./.gradle/embulk").absolutePath}")
             }
         """)
-        projectFile("settings.gradle").writeText("""rootProject.name = 'embulk-input-xlsx'""")
+        projectFile("settings.gradle").writeText("""rootProject.name='embulk-input-xlsx'""")
     }
 
     private fun build(vararg args: String): BuildResult {

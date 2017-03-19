@@ -65,6 +65,7 @@ class EmbulkPlugin : Plugin<Project> {
                 task.into(".")
 
                 task.doLast {
+                    project.file("gradle.properties").writeText("version=0.1.0")
                     project.delete(pluginName)
                 }
             }
