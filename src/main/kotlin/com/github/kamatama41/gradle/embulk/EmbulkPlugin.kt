@@ -76,8 +76,8 @@ class EmbulkPlugin : Plugin<Project> {
         project.tasks.create("classpath", Copy::class.java) { task ->
             project.afterEvaluate {
                 val jar = project.tasks.findByName("jar") as Jar
-                val runtime = project.configurations.findByName("runtime")
-                val provided = project.configurations.findByName("provided")
+                val runtime = checkNotNull(project.configurations.findByName("runtime"))
+                val provided = checkNotNull(project.configurations.findByName("provided"))
 
                 task.dependsOn(jar)
                 task.group = groupName
@@ -144,7 +144,7 @@ class EmbulkPlugin : Plugin<Project> {
     }
 
     fun cleanTask() {
-        project.tasks.findByName("clean").apply {
+        project.tasks.findByName("clean")?.apply {
             doLast { project.delete(classpathDir, gemspecFile) }
         }
     }
@@ -168,8 +168,8 @@ class EmbulkPlugin : Plugin<Project> {
             checkstyleTest.ignoreFailures = extension.checkstyleIgnoreFailures
 
             val sourceSets = project.the<JavaPluginConvention>().sourceSets
-            val main = sourceSets.findByName("main")
-            val test = sourceSets.findByName("test")
+            val main = checkNotNull(sourceSets.findByName("main"))
+            val test = checkNotNull(sourceSets.findByName("test"))
             project.tasks.create("checkstyle", Checkstyle::class.java) { task ->
                 task.classpath = main.output + test.output
                 task.setSource(main.allSource + test.allSource)
