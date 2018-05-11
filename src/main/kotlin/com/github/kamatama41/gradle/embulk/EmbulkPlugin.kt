@@ -172,7 +172,7 @@ class EmbulkPlugin : Plugin<Project> {
             val test = checkNotNull(sourceSets.findByName("test"))
             project.tasks.create("checkstyle", Checkstyle::class.java) { task ->
                 task.classpath = main.output + test.output
-                task.source = main.allSource + test.allSource
+                task.setSource(main.allSource + test.allSource)
             }
         }
     }
