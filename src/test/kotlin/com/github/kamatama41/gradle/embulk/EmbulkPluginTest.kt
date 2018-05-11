@@ -10,16 +10,26 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertThat
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.junit.runners.Parameterized
 import java.io.File
 
-class EmbulkPluginTest : RepositoryTestCase() {
+@RunWith(Parameterized::class)
+class EmbulkPluginTest(private val version: String) : RepositoryTestCase() {
     lateinit var testProjectDir: FileRepository
     val projectDir by lazy { File("${testProjectDir.directory}/..") }
     val buildDir by lazy { "${projectDir.absolutePath}/build/embulk" }
 
+    // Test with both Embulk 0.8 and 0.9
+    companion object {
+        @Parameterized.Parameters
+        @JvmStatic
+        fun versions(): List<String> = listOf("0.8.31", "0.9.7")
+    }
+
     override fun setUp() {
         super.setUp()
-        setupProject()
+        setupProject(version)
     }
 
     @Test
@@ -100,13 +110,13 @@ class EmbulkPluginTest : RepositoryTestCase() {
     // Helper functions
     //////////////////////////////////////////////////////////////
 
-    private fun setupProject() {
+    private fun setupProject(version: String) {
         testProjectDir = createWorkRepository()
         projectFile("build.gradle").writeText("""
             plugins { id "com.github.kamatama41.embulk" }
 
             embulk {
-                version = "0.8.18"
+                version = "$version"
                 category = "file-input"
                 name = "xlsx"
                 authors = ["Author 1", "Author 2"]
