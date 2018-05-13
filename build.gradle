@@ -5,7 +5,7 @@ buildscript {
         maven { url "http://kamatama41.github.com/maven-repository/repository" }
     }
     dependencies {
-        classpath "com.github.kamatama41:gradle-git-release-plugin:0.1.1"
+        classpath "com.github.kamatama41:gradle-git-release-plugin:0.2.0"
     }
 }
 
