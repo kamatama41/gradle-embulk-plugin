@@ -5,6 +5,7 @@ jobs:
       - image: openjdk:8
     steps:
       - checkout
+      - add_ssh_keys
 
       - restore_cache:
           key: v1-gradle-{{ checksum "build.gradle" }}
