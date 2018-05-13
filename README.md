@@ -6,7 +6,7 @@ This Gradle plugin provides you with some tasks to help your [Embulk](http://www
 ## Requirement
 - Gradle 3.2.1 or later
 
-## Installation and configuration
+## Getting started
 Add the snippets to your build.gradle
 
 ```gradle
@@ -33,6 +33,41 @@ embulk {
 ```
 
 So that you can generate your plugin template with the command `(./gradlew|gradle) newPlugin`
+
+```
+% gradle newPlugin
+Starting a Gradle Daemon (subsequent builds will be faster)
+:embulkSetup
+Setting Embulk version to 0.8.18
+:embulk_new_java-file-input_xlsx
+2017-03-21 04:12:05.020 +0900: Embulk v0.8.18
+Creating embulk-input-xlsx/
+  Creating embulk-input-xlsx/README.md
+  Creating embulk-input-xlsx/LICENSE.txt
+  Creating embulk-input-xlsx/.gitignore
+  Creating embulk-input-xlsx/gradle/wrapper/gradle-wrapper.jar
+  Creating embulk-input-xlsx/gradle/wrapper/gradle-wrapper.properties
+  Creating embulk-input-xlsx/gradlew.bat
+  Creating embulk-input-xlsx/gradlew
+  Creating embulk-input-xlsx/config/checkstyle/checkstyle.xml
+  Creating embulk-input-xlsx/config/checkstyle/default.xml
+  Creating embulk-input-xlsx/build.gradle
+  Creating embulk-input-xlsx/lib/embulk/input/xlsx.rb
+  Creating embulk-input-xlsx/src/main/java/org/embulk/input/xlsx/XlsxFileInputPlugin.java
+  Creating embulk-input-xlsx/src/test/java/org/embulk/input/xlsx/TestXlsxFileInputPlugin.java
+
+Plugin template is successfully generated.
+Next steps:
+
+  $ cd embulk-input-xlsx
+  $ ./gradlew package
+
+:newPlugin
+
+BUILD SUCCESSFUL
+
+Total time: 13.166 secs
+```
 
 ## Dependencies
 This plugin automatically adds the following dependency into your project.
