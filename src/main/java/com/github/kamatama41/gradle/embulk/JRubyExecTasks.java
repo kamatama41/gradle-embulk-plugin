@@ -21,8 +21,9 @@ public class JRubyExecTasks {
             @Override
             public void execute(Project project) {
                 task.setJrubyVersion(extension.getJrubyVersion());
-                task.jrubyArgs("-rrubygems/gem_runner", "-eGem::GemRunner.new.run(ARGV)", "push");
-                task.setScript(project.file(String.format("pkg/%s-%s.gem", project.getName(), project.getVersion())));
+                task.jrubyArgs("-S");
+                task.script("gem");
+                task.scriptArgs("push", project.file(String.format("pkg/%s-%s.gem", project.getName(), project.getVersion())));
 
                 JRubyExec.updateJRubyDependencies(project);
             }
@@ -38,8 +39,9 @@ public class JRubyExecTasks {
             @Override
             public void execute(final Project project) {
                 task.setJrubyVersion(extension.getJrubyVersion());
-                task.jrubyArgs("-rrubygems/gem_runner", "-eGem::GemRunner.new.run(ARGV)", "build");
-                task.setScript(project.file(project.getName() + ".gemspec"));
+                task.jrubyArgs("-S");
+                task.script("gem");
+                task.scriptArgs("build", project.file(project.getName() + ".gemspec"));
 
                 task.doLast(new Action<Task>() {
                     @Override

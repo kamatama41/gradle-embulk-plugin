@@ -13,7 +13,7 @@ open class EmbulkExtension(project: Project) {
     var description: String? = null
     var licenses = arrayOf("MIT")
     var homepage = ""
-    var jrubyVersion = "1.7.19" // TODO: update (currently v9.1.x)
+    var jrubyVersion = "9.1.15.0"
 
     var checkstyleVersion = "6.14.1"
     var checkstyleConfig : File? = null
