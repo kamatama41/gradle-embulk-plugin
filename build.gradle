@@ -20,14 +20,14 @@ repositories {
     jcenter()
 }
 
-sourceCompatibility = JavaVersion.VERSION_1_7
-targetCompatibility = JavaVersion.VERSION_1_7
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
 
 dependencies {
     compile gradleApi()
     compile "org.jetbrains.kotlin:kotlin-stdlib"
     compile "com.google.guava:guava:20.0"
-    compile "com.github.jruby-gradle:jruby-gradle-plugin:0.1.5"
+    compile "com.github.jruby-gradle:jruby-gradle-plugin:1.5.0"
     testCompile gradleTestKit()
     testCompile "junit:junit:4.12"
     testCompile "org.eclipse.jgit:org.eclipse.jgit.junit:4.5.0.201609210915-r"
