@@ -10,7 +10,7 @@ buildscript {
 }
 
 plugins {
-    id "org.jetbrains.kotlin.jvm" version "1.2.41"
+    id "org.jetbrains.kotlin.jvm" version "1.3.10"
 }
 apply plugin: "idea"
 apply plugin: "java-gradle-plugin"
