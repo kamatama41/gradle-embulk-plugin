@@ -15,6 +15,12 @@ targetCompatibility = JavaVersion.VERSION_1_8
 
 group = "com.github.kamatama41"
 
+configurations {
+    [compileClasspath, testCompileClasspath].each {
+        it.resolutionStrategy.activateDependencyLocking()
+    }
+}
+
 dependencies {
     implementation gradleApi()
     implementation "org.jetbrains.kotlin:kotlin-stdlib"
