@@ -3,8 +3,8 @@
 # gradle-plugin-embulk
 This Gradle plugin provides you with some tasks to help your [Embulk](http://www.embulk.org) plugin development.
 
-## Requirement
-- Gradle 3.2.1 or later
+## Supported Gradle version
+It's tested on Gradle 4.10.3. It might not work on other version.
 
 ## Getting started
 Add the snippets to your build.gradle
