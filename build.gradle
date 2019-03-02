@@ -1,20 +1,10 @@
-buildscript {
-    repositories {
-        mavenCentral()
-        jcenter()
-        maven { url "http://kamatama41.github.com/maven-repository/repository" }
-    }
-    dependencies {
-        classpath "com.github.kamatama41:gradle-git-release-plugin:0.2.0"
-    }
-}
-
 plugins {
-    id "org.jetbrains.kotlin.jvm" version "1.3.10"
+    id "com.gradle.plugin-publish" version "0.10.1"
+    id "java-gradle-plugin"
+    id "org.jetbrains.kotlin.jvm" version "1.3.21"
+    id "idea"
+    id "com.github.kamatama41.git-release" version "0.3.0"
 }
-apply plugin: "idea"
-apply plugin: "java-gradle-plugin"
-apply plugin: "com.github.kamatama41.git-release"
 
 repositories {
     jcenter()
@@ -23,18 +13,26 @@ repositories {
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
+group = "com.github.kamatama41"
+
+configurations {
+    [compileClasspath, testCompileClasspath].each {
+        it.resolutionStrategy.activateDependencyLocking()
+    }
+}
+
 dependencies {
-    compile gradleApi()
-    compile "org.jetbrains.kotlin:kotlin-stdlib"
-    compile "com.google.guava:guava:20.0"
-    compile "com.github.jruby-gradle:jruby-gradle-plugin:1.5.0"
-    testCompile gradleTestKit()
-    testCompile "junit:junit:4.12"
-    testCompile "org.eclipse.jgit:org.eclipse.jgit.junit:4.5.0.201609210915-r"
+    implementation gradleApi()
+    implementation "org.jetbrains.kotlin:kotlin-stdlib"
+    implementation "com.google.guava:guava:20.0"
+    implementation "com.github.jruby-gradle:jruby-gradle-plugin:1.5.0"
+    testImplementation gradleTestKit()
+    testImplementation "junit:junit:4.12"
+    testImplementation "org.eclipse.jgit:org.eclipse.jgit.junit:4.5.0.201609210915-r"
 }
 
 gitRelease {
-    groupId = "com.github.kamatama41"
+    groupId = group
     artifactId = "gradle-embulk-plugin"
     repoUri = "git@github.com:kamatama41/maven-repository.git"
     repoDir = file("${System.getProperty("user.home")}/gh-maven-repository")
@@ -42,4 +40,26 @@ gitRelease {
 
 gradlePlugin {
     automatedPublishing = false
+
+    plugins {
+        embulkPlugin {
+            id = "${group}.embulk"
+            implementationClass = "com.github.kamatama41.gradle.embulk.EmbulkPlugin"
+        }
+    }
 }
+
+pluginBundle {
+    website = "https://github.com/kamatama41/gradle-embulk-plugin"
+    vcsUrl = "https://github.com/kamatama41/gradle-embulk-plugin"
+    description = "A Gradle plugin that provides some helpful tasks for your Embulk plugin's development."
+    tags = ["embulk"]
+
+    plugins {
+        embulkPlugin {
+            displayName = "Gradle Embulk plugin"
+        }
+    }
+}
+
+afterReleaseBuild.dependsOn publishPlugins
