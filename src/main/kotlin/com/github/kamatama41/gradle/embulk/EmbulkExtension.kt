@@ -22,8 +22,6 @@ open class EmbulkExtension(project: Project) {
 
     var workDir = project.file("${project.projectDir.absolutePath}/.gradle/embulk")
     val binFile get() = File("${workDir.absolutePath}/$version/embulk")
-    var configYaml = "config.yml"
-    var outputYaml = "output.yml"
 
     val displayName get() = name.toUpperCamel()
     val displayCategory get() = category.replace("-", " ")

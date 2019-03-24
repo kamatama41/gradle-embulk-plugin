@@ -99,12 +99,8 @@ so you don't have to specify yaml path and package path by default.
 - `(./gradlew|gradle) embulk_guess`
   - This is equivalent to `embulk guess config.yml -o output.yml -L <project_root>`
 
-If you want to change `config.yml` or `output.yml` to other file name, you can do it with `configYaml` or `outputYaml` option such as the following
+If you want to change `config.yml` or `output.yml` to other file, you can do it by passing a property `configYaml` or `outputYaml` such like following
 
-```gradle
-embulk {
-    ....
-    configYaml = "myconfig.yml"
-    outputYaml = "myoutput.yml"
-}
+```sh
+$ ./gradlew embulk_guess -PconfigYaml=myconfig.yml -PoutputYaml=myoutput.yml
 ```
