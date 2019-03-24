@@ -79,7 +79,7 @@ class EmbulkPluginTest(private val version: String) : RepositoryTestCase() {
 
     @Test
     fun runEmbulkTask() {
-        projectFile("config.yml").writeText("""
+        projectFile("myconfig.yml").writeText("""
             |in:
             |  type: xlsx
             |  option1: 1
@@ -92,7 +92,7 @@ class EmbulkPluginTest(private val version: String) : RepositoryTestCase() {
         """.trimMargin())
 
         // Run will fail because of UnsupportedOperationException
-        val result = buildAndFail("newPlugin", "embulk_run")
+        val result = buildAndFail("newPlugin", "embulk_run", "-PconfigYaml=myconfig.yml")
         assertThat(result.output, containsString("Caused by: java.lang.UnsupportedOperationException: XlsxFileInputPlugin.open method is not implemented yet"))
     }
 

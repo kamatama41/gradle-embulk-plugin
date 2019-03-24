@@ -269,11 +269,21 @@ class EmbulkPlugin : Plugin<Project> {
                     args.add(command)
                     if (listOf("run", "cleanup", "preview", "guess").contains(command)) {
                         task.dependsOn("package")
-                        args.add(extension.configYaml)
+                        val configYaml = if (project.hasProperty("configYaml")) {
+                            project.property("configYaml").toString()
+                        } else {
+                            "config.yml"
+                        }
+                        args.add(configYaml)
 
                         if (command == "guess") {
                             args.add("-o")
-                            args.add(extension.outputYaml)
+                            val outputYaml = if (project.hasProperty("outputYaml")) {
+                                project.property("outputYaml").toString()
+                            } else {
+                                "output.yml"
+                            }
+                            args.add(outputYaml)
                         }
                         args.add("-L")
                         args.add(project.rootDir.absolutePath)
