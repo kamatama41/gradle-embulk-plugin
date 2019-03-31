@@ -289,7 +289,7 @@ class EmbulkPlugin : Plugin<Project> {
                         }
                         val bundlePath = getFromProperty("bundlePath")
                         if (bundlePath != null) {
-                            args.add("--bundle")
+                            args.add("--path")
                             args.add(bundlePath)
                         }
                     }
