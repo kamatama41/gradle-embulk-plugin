@@ -269,29 +269,43 @@ class EmbulkPlugin : Plugin<Project> {
                     args.add(command)
                     if (listOf("run", "cleanup", "preview", "guess").contains(command)) {
                         task.dependsOn("package")
-                        val configYaml = if (project.hasProperty("configYaml")) {
-                            project.property("configYaml").toString()
-                        } else {
-                            "config.yml"
-                        }
+                        val configYaml = getFromProperty("configYaml", "config.yml")
                         args.add(configYaml)
 
                         if (command == "guess") {
                             args.add("-o")
-                            val outputYaml = if (project.hasProperty("outputYaml")) {
-                                project.property("outputYaml").toString()
-                            } else {
-                                "output.yml"
-                            }
+                            val outputYaml = getFromProperty("outputYaml", "output.yml")
                             args.add(outputYaml)
                         }
                         args.add("-L")
                         args.add(project.rootDir.absolutePath)
                     }
+
+                    if (listOf("bundle").contains(command)) {
+                        val gemfile = getFromProperty("gemfile")
+                        if (gemfile != null) {
+                            args.add("--gemfile")
+                            args.add(gemfile)
+                        }
+                        val bundlePath = getFromProperty("bundlePath")
+                        if (bundlePath != null) {
+                            args.add("--bundle")
+                            args.add(bundlePath)
+                        }
+                    }
+
                     args.addAll(token)
 
                     task.args(args)
                 }
+            }
+        }
+
+        private fun getFromProperty(name: String, defaultValue: String? = null): String? {
+            return if (project.hasProperty(name)) {
+                project.property(name).toString()
+            } else {
+                defaultValue
             }
         }
     }
